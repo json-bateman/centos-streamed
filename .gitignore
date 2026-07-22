@@ -7,3 +7,4 @@ __debug
 **/*_templ.go
 data/
 .task/
+datastar-inspector.js

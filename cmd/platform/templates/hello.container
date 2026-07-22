@@ -1,0 +1,19 @@
+[Unit]
+Description=centos-streamed web server (server info page)
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=hello.build
+ContainerName=hello
+Network=proxy.network
+Environment={{env "SERVER_NAME" .ServerName}}
+Environment={{env "SERVER_OS" .ServerOS}}
+Environment={{env "SERVER_KERNEL" .ServerKernel}}
+
+[Service]
+Restart=always
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=multi-user.target

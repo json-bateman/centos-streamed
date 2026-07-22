@@ -1,0 +1,6 @@
+{{.Host}} {
+{{- if .TLSInternal}}
+	tls internal
+{{- end}}
+	reverse_proxy hello:8080
+}

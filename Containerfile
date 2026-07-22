@@ -8,7 +8,7 @@
 # but templ output (*_templ.go) is generated here at build time. The SQLite
 # driver is pure Go (modernc.org/sqlite), so the binary stays static (CGO off).
 
-FROM docker.io/library/golang:1.25 AS build
+FROM docker.io/library/golang:1.26 AS build
 WORKDIR /src
 
 # Download modules first so they cache across source-only changes.

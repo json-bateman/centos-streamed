@@ -2,5 +2,5 @@
 {{- if .TLSInternal}}
 	tls internal
 {{- end}}
-	reverse_proxy hello:8080
+	reverse_proxy streamed:8080
 }

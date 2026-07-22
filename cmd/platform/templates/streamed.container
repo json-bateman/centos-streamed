@@ -1,11 +1,11 @@
 [Unit]
-Description=centos-streamed web server (server info page)
+Description=centos-streamed web server (Datastar app)
 Wants=network-online.target
 After=network-online.target
 
 [Container]
-Image=hello.build
-ContainerName=hello
+Image=streamed.build
+ContainerName=streamed
 Network=proxy.network
 Environment={{env "SERVER_NAME" .ServerName}}
 Environment={{env "SERVER_OS" .ServerOS}}

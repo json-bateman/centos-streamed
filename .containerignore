@@ -1,0 +1,9 @@
+.git
+.github
+data
+tmp
+release
+bin
+*_templ.go
+.env
+.task

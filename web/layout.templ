@@ -1,0 +1,43 @@
+package web
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html
+		data-signals="{theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')}"
+		data-theme-storage="$theme"
+		data-attr:data-theme="$theme"
+		lang="en"
+	>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<link rel="icon" type="image/x-icon" href={ StaticPath("images/rocket.png") }/>
+			<!-- Run before CSS loads to prevent a theme flash, since D* is deferred with type="module" -->
+			<script>
+                (function() {
+                    const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                    document.documentElement.setAttribute('data-theme', theme);
+                })();
+            </script>
+			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
+		</head>
+		<body>
+			<div
+				id="theme-toggle"
+				type="button"
+				class="cursor-pointer"
+				data-on:click="$theme = $theme.includes('dark') ? 'light' : 'dark'"
+			>
+				<iconify-icon icon="material-symbols-light:sunny-rounded" data-show="$theme.includes('dark')"></iconify-icon>
+				<iconify-icon icon="material-symbols-light:moon-stars" data-show="!$theme.includes('dark')"></iconify-icon>
+			</div>
+			<div id="screen-clamp">
+				{ children... }
+			</div>
+		</body>
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2"></script>
+		<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.8/bundles/datastar.js"></script>
+		<script type="module" src={ StaticPath("js/custom-attribute-theme-storage.js") }></script>
+	</html>
+}

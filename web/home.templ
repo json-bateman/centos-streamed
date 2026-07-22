@@ -1,0 +1,92 @@
+package web
+
+import (
+	"fmt"
+	"github.com/json-bateman/centos-streamed/sql/sqlcgen"
+)
+
+templ Home(info ServerInfo, msgs []sqlcgen.Message) {
+	@Layout(info.Name + " — centos-streamed") {
+		<main
+			data-init={ fmt.Sprintf("@get('%s')", SseUrl) }
+			class="flex-col items-center w-full"
+		>
+			<div class="brand mb-2">
+				<span class="dot"></span>
+				<h1>{ info.Name }</h1>
+			</div>
+			<p class="sub mb-4">centos-streamed · datastar + chi + goose + nats</p>
+			@ServerInfoCard(info)
+			@MessageBoard(msgs)
+		</main>
+	}
+}
+
+// ServerInfoCard is patched every second over SSE with a fresh host snapshot.
+templ ServerInfoCard(info ServerInfo) {
+	<section id="server-info" class="card mb-4">
+		<h3 class="mb-2">Live server info</h3>
+		<dl class="info-grid">
+			<dt>Operating&nbsp;system</dt><dd>{ info.OS }</dd>
+			<dt>Kernel</dt><dd>{ info.Kernel }</dd>
+			<dt>Architecture</dt><dd>{ info.Arch }</dd>
+			<dt>CPUs</dt><dd>{ fmt.Sprint(info.CPUs) }</dd>
+			<dt>Memory</dt><dd>{ info.MemFree } free of { info.MemTotal }</dd>
+			<dt>Uptime</dt><dd>{ info.Uptime }</dd>
+			<dt>Goroutines</dt><dd>{ fmt.Sprint(info.Goroutines) }</dd>
+			<dt>Runtime</dt><dd>{ info.GoVersion }</dd>
+			<dt>Server&nbsp;time</dt><dd>{ info.Now }</dd>
+		</dl>
+	</section>
+}
+
+// MessageBoard is the static shell of the board (form + list container). The
+// list inside is what gets patched live via NATS.
+templ MessageBoard(msgs []sqlcgen.Message) {
+	<section class="card w-full">
+		<h3 class="mb-2">Message board</h3>
+		<form onsubmit="return false" class="flex-col mb-4">
+			<label for="author">Name</label>
+			<input
+				id="author"
+				name="author"
+				type="text"
+				placeholder="anonymous"
+				data-bind:author
+			/>
+			<label for="body" class="mt-2">Message</label>
+			<div class="flex">
+				<input
+					id="body"
+					name="body"
+					type="text"
+					class="w-full"
+					placeholder="say something…"
+					data-bind:body
+					data-on:keydown={ fmt.Sprintf("if (evt.key === 'Enter' && $body.trim().length) { @post('%s'); }", MessagesUrl) }
+				/>
+				<button
+					class="shadow ml-2"
+					data-on:click={ fmt.Sprintf("if ($body.trim().length) { @post('%s'); }", MessagesUrl) }
+				>Post</button>
+			</div>
+		</form>
+		@MessageList(msgs)
+	</section>
+}
+
+// MessageList is patched over SSE whenever anyone posts a message.
+templ MessageList(msgs []sqlcgen.Message) {
+	<ul id="messages" class="message-list">
+		if len(msgs) == 0 {
+			<li class="message empty">No messages yet — be the first.</li>
+		}
+		for _, m := range msgs {
+			<li class="message">
+				<span class="author color-primary">{ m.Author }</span>
+				<span class="time">{ humanTime(m.CreatedAt) }</span>
+				<div class="body">{ m.Body }</div>
+			</li>
+		}
+	</ul>
+}

@@ -26,9 +26,9 @@ const (
 	caddyDir   = "/etc/caddy"
 	sitesDir   = "/etc/caddy/sites"
 
-	// helloImage is the tag produced by the hello.build unit and consumed by
-	// hello.container.
-	helloImage = "localhost/hello:latest"
+	// streamedImage is the tag produced by the streamed.build unit and consumed
+	// by streamed.container.
+	streamedImage = "localhost/streamed:latest"
 )
 
 type fileDefinition struct {
@@ -38,12 +38,12 @@ type fileDefinition struct {
 
 // config holds the deployment inputs, sourced from flags and the host.
 type config struct {
-	host         string // hostname Caddy serves the hello site on
+	host         string // hostname Caddy serves the streamed site on
 	tlsMode      string // "internal" (Caddy local CA) or "auto" (Let's Encrypt)
-	buildContext string // build context for hello.build (the repo root)
+	buildContext string // build context for streamed.build (the repo root)
 	generateOnly bool   // when true, write files but run no systemctl/caddy steps
 
-	// Host facts injected into hello.container as environment variables.
+	// Host facts injected into streamed.container as environment variables.
 	serverName   string
 	serverOS     string
 	serverKernel string
@@ -56,7 +56,7 @@ func main() {
 }
 
 func run() error {
-	host := flag.String("host", "localhost", "hostname Caddy serves the hello site on")
+	host := flag.String("host", "localhost", "hostname Caddy serves the streamed site on")
 	tlsMode := flag.String("tls", "internal", "TLS mode: 'internal' (Caddy local CA) or 'auto' (Let's Encrypt)")
 	generateOnly := flag.Bool("generate-only", false, "write files but do not run systemctl / caddy reload")
 	teardown := flag.Bool("teardown", false, "stop services and remove everything the platform manages, then exit")
@@ -80,7 +80,7 @@ func run() error {
 	}
 	if _, err := os.Stat(filepath.Join(buildContext, "Containerfile")); err != nil {
 		return fmt.Errorf(
-			"no Containerfile in %s: run this from the repository root so hello.build has a valid context",
+			"no Containerfile in %s: run this from the repository root so streamed.build has a valid context",
 			buildContext,
 		)
 	}
@@ -118,7 +118,7 @@ func run() error {
 	if cfg.generateOnly {
 		fmt.Println("\nFiles written. Skipping apply (-generate-only). Next run:")
 		fmt.Println("  sudo systemctl daemon-reload")
-		fmt.Println("  sudo systemctl start caddy.service hello.service")
+		fmt.Println("  sudo systemctl start caddy.service streamed.service")
 		return nil
 	}
 
@@ -127,7 +127,7 @@ func run() error {
 	}
 
 	scheme := "https"
-	fmt.Printf("\nDone. hello is live at %s://%s\n", scheme, cfg.host)
+	fmt.Printf("\nDone. streamed is live at %s://%s\n", scheme, cfg.host)
 	if cfg.tlsMode == "internal" {
 		fmt.Println("(TLS uses Caddy's internal CA — expect an untrusted-cert warning until you trust its root.)")
 	}
@@ -169,9 +169,9 @@ var managedLayout = []managedFile{
 	{"caddy-config.volume", filepath.Join(quadletDir, "caddy-config.volume"), 0644},
 	{"caddy.container", filepath.Join(quadletDir, "caddy.container"), 0644},
 	{"Caddyfile", filepath.Join(caddyDir, "Caddyfile"), 0644},
-	{"hello.build", filepath.Join(quadletDir, "hello.build"), 0644},
-	{"hello.container", filepath.Join(quadletDir, "hello.container"), 0644},
-	{"hello.caddy", filepath.Join(sitesDir, "hello.caddy"), 0644},
+	{"streamed.build", filepath.Join(quadletDir, "streamed.build"), 0644},
+	{"streamed.container", filepath.Join(quadletDir, "streamed.container"), 0644},
+	{"streamed.caddy", filepath.Join(sitesDir, "streamed.caddy"), 0644},
 }
 
 // templateData is the data exposed to the embedded templates.
@@ -189,7 +189,7 @@ type templateData struct {
 // path — the same shape the writer loop already consumes.
 func renderManaged(cfg config) (map[string]fileDefinition, error) {
 	data := templateData{
-		Image:        helloImage,
+		Image:        streamedImage,
 		BuildContext: cfg.buildContext,
 		ServerName:   cfg.serverName,
 		ServerOS:     cfg.serverOS,
@@ -238,7 +238,7 @@ func apply(cfg config) error {
 	steps := [][]string{
 		{"systemctl", "daemon-reload"},
 		{"systemctl", "start", "caddy.service"},
-		{"systemctl", "start", "hello.service"},
+		{"systemctl", "start", "streamed.service"},
 	}
 	for _, step := range steps {
 		if err := runStep(step...); err != nil {
@@ -276,8 +276,8 @@ func doTeardown() error {
 	// without stopping the units, systemd still believes they exist and a later
 	// apply won't recreate them (leaving containers with "network not found").
 	services := []string{
-		"hello.service", "caddy.service",
-		"hello-build.service",
+		"streamed.service", "caddy.service",
+		"streamed-build.service",
 		"proxy-network.service",
 		"caddy-data-volume.service", "caddy-config-volume.service",
 	}
@@ -301,8 +301,8 @@ func doTeardown() error {
 
 	// Remove the podman resources. Containers first so the image, volumes, and
 	// network are no longer in use.
-	tryStep("podman", "rm", "-f", "caddy", "hello")
-	tryStep("podman", "rmi", helloImage)
+	tryStep("podman", "rm", "-f", "caddy", "streamed")
+	tryStep("podman", "rmi", streamedImage)
 	tryStep("podman", "volume", "rm", "caddy-data", "caddy-config")
 	tryStep("podman", "network", "rm", "proxy")
 

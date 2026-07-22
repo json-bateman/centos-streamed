@@ -1,0 +1,9 @@
+.DS_Store
+.env
+tmp/
+bin/
+release/
+__debug
+**/*_templ.go
+data/
+.task/

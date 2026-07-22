@@ -1,0 +1,9 @@
+@import "./open-props.css";
+
+@import "reset.css" layer(reset);
+@import "html-elements.css" layer(elements);
+@import "theme.css" layer(theme);
+@import "components.css" layer(components);
+@import "utilities.css" layer(utilities);
+
+@layer reset, theme, elements, components, utilities;

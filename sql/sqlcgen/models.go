@@ -4,9 +4,9 @@
 
 package sqlcgen
 
-type Message struct {
+type Event struct {
 	ID        int64  `json:"id"`
-	Author    string `json:"author"`
-	Body      string `json:"body"`
+	Kind      string `json:"kind"`
+	Ip        string `json:"ip"`
 	CreatedAt int64  `json:"created_at"`
 }

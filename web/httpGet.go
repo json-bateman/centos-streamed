@@ -12,35 +12,50 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-// recentMessages returns the newest messages, most recent first.
-func recentMessages(ctx context.Context, db *sql.DB) []sqlcgen.Message {
+// recentEvents returns the newest events, most recent first.
+func recentEvents(ctx context.Context, db *sql.DB) []sqlcgen.Event {
 	q := sqlcgen.New(db)
-	msgs, err := q.GetRecentMessages(ctx, 50)
+	events, err := q.GetRecentEvents(ctx, 50)
 	if err != nil {
-		slog.Error("GetRecentMessages", "err", err)
+		slog.Error("GetRecentEvents", "err", err)
 		return nil
 	}
-	return msgs
+	return events
 }
 
-func homePage(db *sql.DB) http.HandlerFunc {
+// recordVisit inserts a "visit" event for the requesting client and notifies
+// every open SSE connection to re-render the activity feed.
+func recordVisit(ctx context.Context, db *sql.DB, nc *nats.Conn, ip string) {
+	q := sqlcgen.New(db)
+	if _, err := q.CreateEvent(ctx, sqlcgen.CreateEventParams{Kind: "visit", Ip: ip}); err != nil {
+		slog.Error("CreateEvent", "err", err)
+		return
+	}
+	_ = nc.Publish(eventsSubject, nil)
+}
+
+func homePage(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Loading the app is the "logged on" moment: record it and broadcast.
+		recordVisit(r.Context(), db, nc, clientIP(r))
+
 		info := collectServerInfo()
-		msgs := recentMessages(r.Context(), db)
-		if err := Home(info, msgs).Render(r.Context(), w); err != nil {
+		events := recentEvents(r.Context(), db)
+		if err := Home(info, events).Render(r.Context(), w); err != nil {
 			slog.Debug("render error", "component", "Home", "err", err)
 		}
 	}
 }
 
 // homePageSse keeps the page live: a one-second ticker refreshes the server-info
-// card, and a NATS subscription refreshes the message list whenever anyone posts.
+// card, and a NATS subscription refreshes the activity feed whenever a new event
+// is recorded (by anyone loading the app).
 func homePageSse(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
 
-		msgCh := make(chan *nats.Msg, 8)
-		sub, err := nc.ChanSubscribe(messagesSubject, msgCh)
+		eventCh := make(chan *nats.Msg, 8)
+		sub, err := nc.ChanSubscribe(eventsSubject, eventCh)
 		if err != nil {
 			slog.Error("homePageSse subscribe", "err", err)
 			return
@@ -54,7 +69,7 @@ func homePageSse(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		if err := sse.PatchElementTempl(ServerInfoCard(collectServerInfo())); err != nil {
 			return
 		}
-		if err := sse.PatchElementTempl(MessageList(recentMessages(r.Context(), db))); err != nil {
+		if err := sse.PatchElementTempl(EventList(recentEvents(r.Context(), db))); err != nil {
 			return
 		}
 
@@ -66,8 +81,8 @@ func homePageSse(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 				if err := sse.PatchElementTempl(ServerInfoCard(collectServerInfo())); err != nil {
 					return
 				}
-			case <-msgCh:
-				if err := sse.PatchElementTempl(MessageList(recentMessages(r.Context(), db))); err != nil {
+			case <-eventCh:
+				if err := sse.PatchElementTempl(EventList(recentEvents(r.Context(), db))); err != nil {
 					return
 				}
 			}

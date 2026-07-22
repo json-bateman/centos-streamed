@@ -24,13 +24,12 @@ var StaticFS embed.FS
 var StaticSys = hashfs.NewFS(StaticFS)
 
 const (
-	HomeUrl     = "/"
-	SseUrl      = "/sse"
-	MessagesUrl = "/messages"
+	HomeUrl = "/"
+	SseUrl  = "/sse"
 
-	// messagesSubject is the NATS subject published whenever the message board
-	// changes, so every open SSE connection re-renders the list.
-	messagesSubject = "messages.updated"
+	// eventsSubject is the NATS subject published whenever a new event is
+	// recorded, so every open SSE connection re-renders the activity feed.
+	eventsSubject = "events.updated"
 )
 
 // StaticPath returns the hashed URL for a file under static/, e.g.
@@ -44,9 +43,8 @@ func setupRoutes(db *sql.DB, nc *nats.Conn) chi.Router {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get(HomeUrl, homePage(db))
+	r.Get(HomeUrl, homePage(db, nc))
 	r.Get(SseUrl, homePageSse(db, nc))
-	r.Post(MessagesUrl, postMessage(db, nc))
 
 	// Serve files embedded in the binary.
 	r.Handle("/static/*", hashfs.FileServer(StaticSys))

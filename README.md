@@ -44,8 +44,10 @@ views, an embedded [NATS] pub/sub bus, and [hashfs] content-hashed static assets
 
 - a **live server-info card** (host name/OS/kernel/memory/uptime), pushed over
   SSE and refreshed every second, and
-- a **shared message board** — posting a message writes to SQLite and publishes
-  on NATS, which fans out to every open SSE connection so all clients update live.
+- a **live login/activity feed** — each time someone loads the app it records a
+  `visit` event (client IP + timestamp) to the SQLite `events` table and publishes
+  on NATS, which fans out to every open SSE connection so all clients see the new
+  login appear live.
 
 Host facts (`SERVER_NAME`, `SERVER_OS`, `SERVER_KERNEL`) are injected by the
 platform CLI onto `streamed.container`; the `/proc`-based fields (memory, uptime)

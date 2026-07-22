@@ -1,10 +1,10 @@
 -- +goose Up
-CREATE TABLE messages (
+CREATE TABLE events (
     id         INTEGER PRIMARY KEY,
-    author     TEXT NOT NULL,
-    body       TEXT NOT NULL,
+    kind       TEXT NOT NULL DEFAULT 'visit',
+    ip         TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
 -- +goose Down
-DROP TABLE messages;
+DROP TABLE events;

@@ -5,7 +5,7 @@ import (
 	"github.com/json-bateman/centos-streamed/sql/sqlcgen"
 )
 
-templ Home(info ServerInfo, msgs []sqlcgen.Message) {
+templ Home(info ServerInfo, events []sqlcgen.Event) {
 	@Layout(info.Name + " — centos-streamed") {
 		<main
 			data-init={ fmt.Sprintf("@get('%s')", SseUrl) }
@@ -17,7 +17,7 @@ templ Home(info ServerInfo, msgs []sqlcgen.Message) {
 			</div>
 			<p class="sub mb-4">centos-streamed · datastar + chi + goose + nats</p>
 			@ServerInfoCard(info)
-			@MessageBoard(msgs)
+			@ActivityFeed(events)
 		</main>
 	}
 }
@@ -40,52 +40,26 @@ templ ServerInfoCard(info ServerInfo) {
 	</section>
 }
 
-// MessageBoard is the static shell of the board (form + list container). The
-// list inside is what gets patched live via NATS.
-templ MessageBoard(msgs []sqlcgen.Message) {
+// ActivityFeed is the static shell of the feed; the list inside is patched live
+// via NATS whenever someone logs onto the app.
+templ ActivityFeed(events []sqlcgen.Event) {
 	<section class="card w-full">
-		<h3 class="mb-2">Message board</h3>
-		<form onsubmit="return false" class="flex-col mb-4">
-			<label for="author">Name</label>
-			<input
-				id="author"
-				name="author"
-				type="text"
-				placeholder="anonymous"
-				data-bind:author
-			/>
-			<label for="body" class="mt-2">Message</label>
-			<div class="flex">
-				<input
-					id="body"
-					name="body"
-					type="text"
-					class="w-full"
-					placeholder="say something…"
-					data-bind:body
-					data-on:keydown={ fmt.Sprintf("if (evt.key === 'Enter' && $body.trim().length) { @post('%s'); }", MessagesUrl) }
-				/>
-				<button
-					class="shadow ml-2"
-					data-on:click={ fmt.Sprintf("if ($body.trim().length) { @post('%s'); }", MessagesUrl) }
-				>Post</button>
-			</div>
-		</form>
-		@MessageList(msgs)
+		<h3 class="mb-2">Login activity</h3>
+		@EventList(events)
 	</section>
 }
 
-// MessageList is patched over SSE whenever anyone posts a message.
-templ MessageList(msgs []sqlcgen.Message) {
-	<ul id="messages" class="message-list">
-		if len(msgs) == 0 {
-			<li class="message empty">No messages yet — be the first.</li>
+// EventList is patched over SSE whenever a new visit event is recorded.
+templ EventList(events []sqlcgen.Event) {
+	<ul id="events" class="event-list">
+		if len(events) == 0 {
+			<li class="event empty">No one has logged on yet.</li>
 		}
-		for _, m := range msgs {
-			<li class="message">
-				<span class="author color-primary">{ m.Author }</span>
-				<span class="time">{ humanTime(m.CreatedAt) }</span>
-				<div class="body">{ m.Body }</div>
+		for _, e := range events {
+			<li class="event">
+				<span class="ip color-primary">{ e.Ip }</span>
+				<span class="kind">logged on</span>
+				<span class="time">{ humanTime(e.CreatedAt) }</span>
 			</li>
 		}
 	</ul>

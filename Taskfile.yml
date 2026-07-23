@@ -6,17 +6,7 @@ tasks:
     cmds:
       - go get -tool github.com/air-verse/air
       - go get -tool github.com/a-h/templ/cmd/templ
-      - go get -tool github.com/sqlc-dev/sqlc/cmd/sqlc
       - go mod tidy
-
-  sqlc:
-    cmds:
-      - go tool sqlc generate
-    sources:
-      - sql/queries/*.sql
-      - sqlc.yaml
-    generates:
-      - sql/sqlcgen/*.go
 
   templ:build:
     desc: Generate templ files
@@ -24,22 +14,20 @@ tasks:
 
   go:build:
     desc: Build the web server for production
-    deps: [templ:build, sqlc]
+    deps: [templ:build]
     cmds:
       - mkdir -p ./release
-      - go build -o ./release/web ./cmd/web
+      - go build -o ./release/web ./cmd
       - echo "Release built in ./release/"
 
   clean:
-    desc: Clean build artifacts (including database)
+    desc: Clean build artifacts
     cmds:
       - rm -rf ./tmp
       - rm -rf ./release
       - find . -name "*_templ.go" -delete
-      - rm -rf ./data
 
   default:
     desc: Run and watch with air
-    deps: [sqlc]
     cmds:
       - go tool air

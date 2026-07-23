@@ -1,4 +1,0 @@
-{
-}
-
-import /etc/caddy/sites/*.caddy

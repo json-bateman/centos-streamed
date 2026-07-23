@@ -1,33 +1,25 @@
 package web
 
-import (
-	"fmt"
-	"github.com/json-bateman/centos-streamed/sql/sqlcgen"
-)
+import "fmt"
 
-templ Home(info ServerInfo, events []sqlcgen.Event) {
-	@Layout(info.Name + " — centos-streamed") {
-		<main
-			data-init={ fmt.Sprintf("@get('%s')", SseUrl) }
-			class="flex-col items-center w-full"
-		>
-			<div class="brand mb-2">
-				<span class="dot"></span>
-				<h1>{ info.Name }</h1>
-			</div>
-			<p class="sub mb-4">centos-streamed · datastar + chi + goose + nats</p>
+templ Home(info ServerInfo, procs []Process) {
+	@Layout(info.Name + " — system monitor") {
+		<main data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
+			<h1>{ info.Name }</h1>
+			<p>live system monitor · datastar + chi · reading /proc</p>
 			@ServerInfoCard(info)
-			@ActivityFeed(events)
+			@ProcessTable(procs)
 		</main>
 	}
 }
 
-// ServerInfoCard is patched every second over SSE with a fresh host snapshot.
+// ServerInfoCard is patched every couple of seconds over SSE with a fresh host
+// snapshot.
 templ ServerInfoCard(info ServerInfo) {
-	<section id="server-info" class="card mb-4">
-		<h3 class="mb-2">Live server info</h3>
-		<dl class="info-grid">
-			<dt>Operating&nbsp;system</dt><dd>{ info.OS }</dd>
+	<section id="server-info">
+		<h3>Live server info</h3>
+		<dl>
+			<dt>Operating system</dt><dd>{ info.OS }</dd>
 			<dt>Kernel</dt><dd>{ info.Kernel }</dd>
 			<dt>Architecture</dt><dd>{ info.Arch }</dd>
 			<dt>CPUs</dt><dd>{ fmt.Sprint(info.CPUs) }</dd>
@@ -35,32 +27,43 @@ templ ServerInfoCard(info ServerInfo) {
 			<dt>Uptime</dt><dd>{ info.Uptime }</dd>
 			<dt>Goroutines</dt><dd>{ fmt.Sprint(info.Goroutines) }</dd>
 			<dt>Runtime</dt><dd>{ info.GoVersion }</dd>
-			<dt>Server&nbsp;time</dt><dd>{ info.Now }</dd>
+			<dt>Server time</dt><dd>{ info.Now }</dd>
 		</dl>
 	</section>
 }
 
-// ActivityFeed is the static shell of the feed; the list inside is patched live
-// via NATS whenever someone logs onto the app.
-templ ActivityFeed(events []sqlcgen.Event) {
-	<section class="card w-full">
-		<h3 class="mb-2">Login activity</h3>
-		@EventList(events)
+// ProcessTable is patched over SSE with a fresh /proc snapshot, sorted by memory.
+templ ProcessTable(procs []Process) {
+	<section id="processes">
+		<h3>Processes — top { fmt.Sprint(len(procs)) } by memory</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>PID</th>
+					<th>User</th>
+					<th>Command</th>
+					<th>State</th>
+					<th>Threads</th>
+					<th>Memory</th>
+					<th>CPU time</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(procs) == 0 {
+					<tr><td colspan="7">No processes found (is this running on Linux?).</td></tr>
+				}
+				for _, p := range procs {
+					<tr>
+						<td>{ fmt.Sprint(p.PID) }</td>
+						<td>{ p.User }</td>
+						<td>{ p.Command }</td>
+						<td>{ p.State }</td>
+						<td>{ fmt.Sprint(p.Threads) }</td>
+						<td>{ p.RSS }</td>
+						<td>{ p.CPUTime }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
 	</section>
-}
-
-// EventList is patched over SSE whenever a new visit event is recorded.
-templ EventList(events []sqlcgen.Event) {
-	<ul id="events" class="event-list">
-		if len(events) == 0 {
-			<li class="event empty">No one has logged on yet.</li>
-		}
-		for _, e := range events {
-			<li class="event">
-				<span class="ip color-primary">{ e.Ip }</span>
-				<span class="kind">logged on</span>
-				<span class="time">{ humanTime(e.CreatedAt) }</span>
-			</li>
-		}
-	</ul>
 }

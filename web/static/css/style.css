@@ -1,0 +1,59 @@
+/*
+ * Morpheus component-token bridge.
+ *
+ * Extracted from the Morpheus site's style.css (:root blocks only). morpheus.css
+ * styles the <neo-*> components using --neo-* variables, but only the theme
+ * palette (--accent, --btn-bg, --page-fg, ...) is defined by the theme files.
+ * These :root rules map the component tokens onto the palette, which is what
+ * makes buttons (and selected buttongroup options) pick up the accent color.
+ *
+ * Load AFTER morpheus.css and the theme. Site-specific rules from style.css are
+ * intentionally omitted so they don't override the theme.
+ */
+:root {
+    --neo-popover-bg: var(--btn-bg);
+    --neo-popover-color: var(--page-fg);
+    --neo-popover-border-color: var(--btn-border);
+
+    --neo-button-bg: var(--btn-bg);
+    --neo-button-color: var(--btn-fg);
+    --neo-button-border-color: var(--btn-border);
+    --neo-button-hover-bg: var(--btn-hover-bg);
+
+    --neo-button-primary-bg: var(--accent);
+    --neo-button-primary-color: var(--accent-fg);
+    --neo-button-primary-hover-bg: var(--accent-hover);
+
+    --neo-button-secondary-bg: color-mix(in srgb, var(--page-fg) 10%, transparent);
+    --neo-button-secondary-color: var(--page-fg);
+    --neo-button-secondary-hover-bg: color-mix(in srgb, var(--page-fg) 16%, transparent);
+
+    --neo-button-ghost-bg: transparent;
+    --neo-button-ghost-color: var(--page-fg);
+    --neo-button-ghost-hover-bg: var(--btn-hover-bg);
+
+    --neo-button-danger-bg: var(--danger-bg);
+    --neo-button-danger-color: var(--danger-fg);
+    --neo-button-danger-hover-bg: var(--danger-hover-bg);
+
+    --neo-button-focus-ring: var(--accent);
+
+    --neo-select-option-hover-bg: color-mix(in srgb, var(--accent) 16%, transparent);
+    --neo-select-option-selected-bg: var(--accent);
+    --neo-select-option-selected-color: var(--accent-fg);
+}
+
+:root {
+    --page-edge-padding: 1rem;
+}
+
+:root {
+    --app-shell-height: calc(1em + round(calc(var(--page-spacing, .25rem) * 2), 1px)*2 + 3px + round(calc(var(--page-spacing, .25rem) * 3), 1px)*2);
+}
+
+body {
+    font-family: var(--page-font-family);
+    color: var(--page-fg);
+    background: var(--page-bg);
+    line-height: 1.5;
+}

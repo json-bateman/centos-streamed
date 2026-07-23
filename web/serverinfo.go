@@ -8,11 +8,10 @@ import (
 	"time"
 )
 
-// ServerInfo is the live host information rendered into the page. Fields that
-// describe the host (Name, OS, Kernel) come from environment variables set by
-// the platform CLI on the container; the rest are read at request time from the
-// Go runtime and /proc, which is not namespaced for these values and so
-// reflects the host the container runs on.
+// ServerInfo is the live host information rendered into the page. Everything is
+// read at request time — the hostname from the OS, OS/kernel from /etc and
+// /proc, and the rest from the Go runtime and /proc — so it reflects whatever
+// machine the binary is running on.
 type ServerInfo struct {
 	Name       string
 	OS         string
@@ -27,20 +26,17 @@ type ServerInfo struct {
 	Goroutines int
 }
 
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
 // collectServerInfo gathers a fresh snapshot of host information.
 func collectServerInfo() ServerInfo {
 	total, free := meminfo()
+	name, err := os.Hostname()
+	if err != nil {
+		name = "unknown-host"
+	}
 	return ServerInfo{
-		Name:       envOr("SERVER_NAME", "unknown-host"),
-		OS:         envOr("SERVER_OS", "unknown"),
-		Kernel:     envOr("SERVER_KERNEL", "unknown"),
+		Name:       name,
+		OS:         osPrettyName(),
+		Kernel:     kernelRelease(),
 		Arch:       runtime.GOARCH,
 		CPUs:       runtime.NumCPU(),
 		GoVersion:  runtime.Version(),
@@ -50,6 +46,30 @@ func collectServerInfo() ServerInfo {
 		Now:        time.Now().Format("2006-01-02 15:04:05 MST"),
 		Goroutines: runtime.NumGoroutine(),
 	}
+}
+
+// osPrettyName returns PRETTY_NAME from /etc/os-release (e.g. "CentOS Stream
+// 10"), falling back to the OS family name off Linux or if unreadable.
+func osPrettyName() string {
+	data, err := os.ReadFile("/etc/os-release")
+	if err != nil {
+		return runtime.GOOS
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if v, ok := strings.CutPrefix(line, "PRETTY_NAME="); ok {
+			return strings.Trim(v, `"`)
+		}
+	}
+	return runtime.GOOS
+}
+
+// kernelRelease returns the running kernel version from /proc.
+func kernelRelease() string {
+	data, err := os.ReadFile("/proc/sys/kernel/osrelease")
+	if err != nil {
+		return "unknown"
+	}
+	return strings.TrimSpace(string(data))
 }
 
 // uptime reads /proc/uptime and returns a human-readable duration.

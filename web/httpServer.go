@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"fmt"
 	"log"
@@ -13,7 +12,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	streamed "github.com/json-bateman/centos-streamed"
-	"github.com/nats-io/nats.go"
 )
 
 //go:embed static/*
@@ -26,10 +24,6 @@ var StaticSys = hashfs.NewFS(StaticFS)
 const (
 	HomeUrl = "/"
 	SseUrl  = "/sse"
-
-	// eventsSubject is the NATS subject published whenever a new event is
-	// recorded, so every open SSE connection re-renders the activity feed.
-	eventsSubject = "events.updated"
 )
 
 // StaticPath returns the hashed URL for a file under static/, e.g.
@@ -38,13 +32,13 @@ func StaticPath(format string, args ...any) string {
 	return "/" + StaticSys.HashName(fmt.Sprintf("static/"+format, args...))
 }
 
-func setupRoutes(db *sql.DB, nc *nats.Conn) chi.Router {
+func setupRoutes() chi.Router {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get(HomeUrl, homePage(db, nc))
-	r.Get(SseUrl, homePageSse(db, nc))
+	r.Get(HomeUrl, homePage())
+	r.Get(SseUrl, homePageSse())
 
 	// Serve files embedded in the binary.
 	r.Handle("/static/*", hashfs.FileServer(StaticSys))
@@ -59,16 +53,10 @@ func setupRoutes(db *sql.DB, nc *nats.Conn) chi.Router {
 	return r
 }
 
-// RunBlocking wires up the NATS bus and routes, starts the HTTP server, and
-// blocks until setupCtx is cancelled, at which point it shuts down gracefully.
-func RunBlocking(setupCtx context.Context, db *sql.DB) error {
-	nc, err := startNats()
-	if err != nil {
-		return fmt.Errorf("start nats: %w", err)
-	}
-	defer nc.Close()
-
-	router := setupRoutes(db, nc)
+// RunBlocking starts the HTTP server and blocks until setupCtx is cancelled, at
+// which point it shuts down gracefully.
+func RunBlocking(setupCtx context.Context) error {
+	router := setupRoutes()
 
 	addr := fmt.Sprintf(":%d", streamed.Env.Port)
 	srv := http.Server{

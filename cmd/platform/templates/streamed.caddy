@@ -1,6 +1,0 @@
-{{.Host}} {
-{{- if .TLSInternal}}
-	tls internal
-{{- end}}
-	reverse_proxy streamed:8080
-}

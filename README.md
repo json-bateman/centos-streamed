@@ -1,102 +1,75 @@
 # centos-streamed
 
-A tiny Go platform that runs containers directly on **systemd + Podman (Quadlet)**,
-fronted by **Caddy** for HTTPS. One CLI generates all the host config and applies it.
+A tiny Cockpit-style **system monitor**: a single Go binary that serves a live
+web view of the machine it runs on — host facts and the running process list —
+pushed to the browser over server-sent events.
+
+No database, no reverse proxy, no deploy tooling. Just a webserver reading
+`/proc`.
 
 ## Structure
 
 ```
 centos-streamed/
-├── Containerfile              # builds ./cmd/web (templ generate + go build)
-├── env.go                     # web-server config (package streamed)
-├── sqlc.yaml  Taskfile.yml  .air.toml
-├── cmd/
-│   ├── platform/              # the reconciler CLI (generates host wiring)
-│   │   ├── main.go
-│   │   └── templates/         # embedded Quadlet + Caddy files (go:embed)
-│   │       ├── proxy.network
-│   │       ├── caddy-data.volume
-│   │       ├── caddy-config.volume
-│   │       ├── caddy.container
-│   │       ├── Caddyfile
-│   │       ├── streamed.build     # {{.Image}}, {{.BuildContext}}
-│   │       ├── streamed.container # {{env "SERVER_NAME" .ServerName}} …
-│   │       └── streamed.caddy     # {{.Host}}, {{- if .TLSInternal}}
-│   └── web/main.go            # thin entrypoint → web.RunBlocking
-├── web/                       # the Datastar app (chi routes, templ views, SSE)
-│   ├── httpServer.go  httpGet.go  httpPost.go  nats.go  serverinfo.go
-│   ├── *.templ               # layout, home, 404 (templ → *_templ.go)
-│   └── static/               # open-props CSS + theme JS (embedded, hashfs)
-├── sql/                       # goose migrations + sqlc-generated queries
-│   ├── db.go  migrations/  queries/  sqlcgen/
+├── env.go                 # config (PORT), package streamed
+├── cmd/main.go            # entrypoint → web.RunBlocking
+├── web/
+│   ├── httpServer.go      # chi routes + graceful HTTP server
+│   ├── httpGet.go         # home page + SSE loop (2s refresh)
+│   ├── serverinfo.go      # host facts from os-release / /proc / runtime
+│   ├── procinfo.go        # process list from /proc/<pid>
+│   ├── *.templ            # layout, home (info card + process table), 404
+│   └── static/            # CSS + theme JS (embedded, content-hashed)
 └── go.mod
 ```
 
-The CLI renders `templates/` → `/etc/containers/systemd/*` and `/etc/caddy/*`,
-then reloads systemd, starts the services, and reloads Caddy.
+## How it works
 
-## The web app
+`cmd/main.go` starts a [chi] HTTP server. The home page renders a host-info card
+and a process table; a `data-init` [Datastar] attribute opens an SSE connection
+to `/sse`, which every two seconds re-reads `/proc` and patches both fragments
+back into the page live.
 
-`./cmd/web` is a **Datastar-driven server** on the same stack as the `basicauth`
-reference project — [chi] routing, [goose] migrations, [sqlc] queries, [templ]
-views, an embedded [NATS] pub/sub bus, and [hashfs] content-hashed static assets
-— **without any authentication**. It serves:
+- **Host facts** — hostname, `PRETTY_NAME` from `/etc/os-release`, kernel from
+  `/proc/sys/kernel/osrelease`, plus memory/uptime from `/proc` and CPUs/arch
+  from the Go runtime.
+- **Processes** — walks `/proc/<pid>/{status,stat}` for each process: command,
+  resolved user, state, threads, resident memory and cumulative CPU time,
+  sorted by memory (top 40).
 
-- a **live server-info card** (host name/OS/kernel/memory/uptime), pushed over
-  SSE and refreshed every second, and
-- a **live login/activity feed** — each time someone loads the app it records a
-  `visit` event (client IP + timestamp) to the SQLite `events` table and publishes
-  on NATS, which fans out to every open SSE connection so all clients see the new
-  login appear live.
-
-Host facts (`SERVER_NAME`, `SERVER_OS`, `SERVER_KERNEL`) are injected by the
-platform CLI onto `streamed.container`; the `/proc`-based fields (memory, uptime)
-reflect the host and only populate inside the Linux container.
+These reads only return data on **Linux**, so run it inside the VM, not on macOS.
 
 [chi]: https://github.com/go-chi/chi
-[goose]: https://github.com/pressly/goose
-[sqlc]: https://sqlc.dev
+[Datastar]: https://data-star.dev
 [templ]: https://templ.guide
-[NATS]: https://nats.io
-[hashfs]: https://github.com/benbjohnson/hashfs
 
-## Commands
+## Run
 
-```bash
-# Deploy: render files, build image, start services, reload Caddy
-sudo go run ./cmd/platform
-
-# Options
-sudo go run ./cmd/platform -host app.example.com -tls auto   # real domain + Let's Encrypt
-sudo go run ./cmd/platform -generate-only                    # write files only, no apply
-
-# Clean slate (stop + remove units, containers, image, volumes, network)
-sudo go run ./cmd/platform -teardown
-```
-
-## Web dev (fast loop, no containers)
-
-Iterate on the web app directly with hot reload — no Podman/Caddy needed:
+Dev loop with hot reload (regenerates templ + rebuilds on save):
 
 ```bash
-task setup   # once: install pinned templ / sqlc / air tools into go.mod
-task         # sqlc generate, then `air` (regenerates templ + rebuilds on save)
+task setup   # once: install pinned templ / air tools into go.mod
+task         # runs air
 ```
 
-Then open **http://localhost:8080**. Config (all `STREAMED_`-prefixed) lives in
-`env.go`; override via a `.env` file. Other tasks: `task sqlc`, `task templ:build`,
-`task go:build` (production binary → `./release/web`), `task clean`.
-
-## For Development (Mac OS)
-Run from the repo root inside the VM (`limactl shell centos10`):
-
-Test loop: after editing `cmd/web`, just re-run `sudo go run ./cmd/platform`
-(`-teardown` clears the image so changes always rebuild).
-
-Podman publishes ports via nft DNAT, which Lima can't auto-forward, so tunnel:
+Or build and run directly:
 
 ```bash
-ssh -F ~/.lima/centos10/ssh.config -N -L 8443:127.0.0.1:443 lima-centos10
+task go:build        # -> ./release/web
+go run ./cmd
 ```
 
-Then open **https://localhost:8443** (accept the `tls internal` cert warning).
+Then open **http://localhost:8080**. Config is `STREAMED_`-prefixed (see
+`env.go`); override via `.env`.
+
+## Development on macOS (Lima VM)
+
+`/proc` only exists on Linux, so run inside the `centos10` VM. The repo is
+mounted at `/home/lima/centos10/centos-streamed` and guest port 8080 is
+forwarded to the host:
+
+```bash
+limactl shell centos10 sh -c 'cd /home/lima/centos10/centos-streamed && go run ./cmd'
+```
+
+Then open **http://localhost:8080** on the Mac.

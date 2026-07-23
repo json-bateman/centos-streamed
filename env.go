@@ -1,6 +1,5 @@
 // Package streamed holds process-wide configuration for the centos-streamed
-// web server. It mirrors the layout of the basicauth reference project but
-// carries no authentication settings.
+// system monitor.
 package streamed
 
 import (
@@ -12,13 +11,8 @@ import (
 )
 
 type Config struct {
-	Port   int    `envconfig:"PORT" default:"8080"`
-	DBPath string `envconfig:"DB_PATH" default:"./data/streamed.db"`
+	Port int `envconfig:"PORT" default:"8080"`
 }
-
-// The host facts injected by the platform CLI (SERVER_NAME, SERVER_OS,
-// SERVER_KERNEL) are read directly in the web package rather than through
-// envconfig, since they are set without the STREAMED_ prefix.
 
 var Env Config
 

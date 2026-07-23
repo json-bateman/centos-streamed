@@ -1,8 +1,0 @@
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--text));
-  font-family: var(--ff-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}

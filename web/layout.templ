@@ -5,6 +5,10 @@ templ Layout(title string) {
 	<html
 		class="theme-sunshine"
 		data-signals="{_mode: (localStorage.getItem('neo-mode') || 'system')}"
+		data-class="{
+			dark:  $_mode === 'dark'  || ($_mode === 'system' &&  window.matchMedia('(prefers-color-scheme: dark)').matches),
+			light: $_mode === 'light' || ($_mode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches)
+		}"
 		lang="en"
 	>
 		<head>
@@ -45,7 +49,6 @@ templ Layout(title string) {
                     });
                 })();
             </script>
-			<!-- Single entry point; imports reset, Morpheus, token bridge, theme, utilities in order. -->
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<body>
@@ -61,11 +64,9 @@ templ Layout(title string) {
 				<neo-button value="system" aria-label="System" role="radio" tabindex="0">◐</neo-button>
 				<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
 			</neo-buttongroup>
-			<div id="screen-clamp">
-				{ children... }
-			</div>
+			{ children... }
 		</body>
-		<!-- Datastar v1.0.0-RC.8 (vendored locally; ES module, keep type="module"). -->
+		<!-- Datastar v1.0.0-RC.8 -->
 		<script type="module" src={ StaticPath("js/datastar.js") }></script>
 		<!-- Morpheus bundle — classic script (registers the <neo-*> custom elements). -->
 		<script defer src={ StaticPath("js/bundle.js") }></script>

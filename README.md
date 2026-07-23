@@ -59,17 +59,17 @@ task go:build        # -> ./release/web
 go run ./cmd
 ```
 
-Then open **http://localhost:8080**. Config is `STREAMED_`-prefixed (see
+Then open **http://localhost:44223**. Config is `STREAMED_`-prefixed (see
 `env.go`); override via `.env`.
 
 ## Development on macOS (Lima VM)
 
 `/proc` only exists on Linux, so run inside the `centos10` VM. The repo is
-mounted at `/home/lima/centos10/centos-streamed` and guest port 8080 is
+mounted at `/home/lima/centos10/centos-streamed` and guest port 44223 is
 forwarded to the host:
 
 ```bash
 limactl shell centos10 sh -c 'cd /home/lima/centos10/centos-streamed && go run ./cmd'
 ```
 
-Then open **http://localhost:8080** on the Mac.
+Then open **http://localhost:44223** on the Mac.

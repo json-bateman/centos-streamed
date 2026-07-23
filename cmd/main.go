@@ -1,9 +1,6 @@
 // Command centos-streamed is a tiny Cockpit-style system monitor: a single Go
 // binary that serves a live web view of the machine it runs on — host facts and
 // the running process list — pushed to the browser over server-sent events.
-//
-// No database, no reverse proxy, no deploy tooling: just a webserver reading
-// /proc. Run it on the host (or inside the VM) and open the printed URL.
 package main
 
 import (
@@ -24,8 +21,7 @@ func main() {
 		Level: slog.LevelDebug,
 	})))
 
-	// CTRL+C sends SIGINT; `kill` and service stop send SIGTERM. Both trigger a
-	// graceful shutdown.
+	// CTRL+C sends SIGINT; `kill` and service stop send SIGTERM. Both trigger a graceful shutdown.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

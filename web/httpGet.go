@@ -25,20 +25,16 @@ func homePageSse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
 
-		ticker := time.NewTicker(2 * time.Second)
+		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 
 		push := func() bool {
-			if err := sse.PatchElementTempl(ServerInfoCard(collectServerInfo())); err != nil {
-				return false
-			}
-			if err := sse.PatchElementTempl(ProcessTable(collectProcesses(processLimit))); err != nil {
+			if err := sse.PatchElementTempl(Home(collectServerInfo(), collectProcesses(processLimit))); err != nil {
 				return false
 			}
 			return true
 		}
 
-		// Prime both fragments immediately on connect, then refresh on the tick.
 		if !push() {
 			return
 		}

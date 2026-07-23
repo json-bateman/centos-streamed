@@ -13,28 +13,36 @@ templ Home(info ServerInfo, procs []Process) {
 	}
 }
 
-// ServerInfoCard is patched every couple of seconds over SSE with a fresh host
-// snapshot.
+// ServerInfoCard is patched every couple of seconds over SSE with a fresh host snapshot.
 templ ServerInfoCard(info ServerInfo) {
-	<section id="server-info">
+	<section>
 		<h3>Live server info</h3>
 		<dl>
-			<dt>Operating system</dt><dd>{ info.OS }</dd>
-			<dt>Kernel</dt><dd>{ info.Kernel }</dd>
-			<dt>Architecture</dt><dd>{ info.Arch }</dd>
-			<dt>CPUs</dt><dd>{ fmt.Sprint(info.CPUs) }</dd>
-			<dt>Memory</dt><dd>{ info.MemFree } free of { info.MemTotal }</dd>
-			<dt>Uptime</dt><dd>{ info.Uptime }</dd>
-			<dt>Goroutines</dt><dd>{ fmt.Sprint(info.Goroutines) }</dd>
-			<dt>Runtime</dt><dd>{ info.GoVersion }</dd>
-			<dt>Server time</dt><dd>{ info.Now }</dd>
+			<dt>Operating system</dt>
+			<dd>{ info.OS }</dd>
+			<dt>Kernel</dt>
+			<dd>{ info.Kernel }</dd>
+			<dt>Architecture</dt>
+			<dd>{ info.Arch }</dd>
+			<dt>CPUs</dt>
+			<dd>{ fmt.Sprint(info.CPUs) }</dd>
+			<dt>Memory</dt>
+			<dd>{ info.MemFree } free of { info.MemTotal }</dd>
+			<dt>Uptime</dt>
+			<dd>{ info.Uptime }</dd>
+			<dt>Goroutines</dt>
+			<dd>{ fmt.Sprint(info.Goroutines) }</dd>
+			<dt>Runtime</dt>
+			<dd>{ info.GoVersion }</dd>
+			<dt>Server time</dt>
+			<dd>{ info.Now }</dd>
 		</dl>
 	</section>
 }
 
 // ProcessTable is patched over SSE with a fresh /proc snapshot, sorted by memory.
 templ ProcessTable(procs []Process) {
-	<section id="processes">
+	<section>
 		<h3>Processes — top { fmt.Sprint(len(procs)) } by memory</h3>
 		<table>
 			<thead>

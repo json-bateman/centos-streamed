@@ -5,21 +5,6 @@ import (
 	"strings"
 )
 
-templ Page(info ServerInfo, procs []Process) {
-	@Layout("system monitor") {
-		@Home(info, procs)
-	}
-}
-
-templ Home(info ServerInfo, procs []Process) {
-	<main id="home-morph-target" data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
-		<h1>{ info.Name }</h1>
-		<p>live system monitor · datastar + chi · reading /proc</p>
-		@ServerInfoCard(info)
-		@ProcessTable(procs)
-	</main>
-}
-
 templ card(iconName string) {
 	<div class="home-card">
 		<header>
@@ -29,7 +14,7 @@ templ card(iconName string) {
 	</div>
 }
 
-templ OSLogo(osName string) {
+templ osLogo(osName string) {
 	switch  {
 		case strings.Contains(strings.ToLower(osName), "centos"):
 			<img class="os-logo" src={ StaticPath("images/os/centos.png") } alt="CentOS" width="20" height="20"/>
@@ -38,33 +23,117 @@ templ OSLogo(osName string) {
 	}
 }
 
-// ServerInfoCard is patched every couple of seconds over SSE with a fresh host snapshot.
-templ ServerInfoCard(info ServerInfo) {
+templ Page(info ServerInfo, procs []Process) {
+	@Layout("system monitor") {
+		@Home(info, procs)
+	}
+}
+
+templ Home(info ServerInfo, procs []Process) {
+	<main id="home-morph-target" data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
+		<h1>{ info.Name }</h1>
+		<h3>live system monitor</h3>
+		@ServerInfoCards(info)
+		@ProcessTable(procs)
+	</main>
+}
+
+templ ServerInfoCards(info ServerInfo) {
 	<section>
 		<h3>Live server info</h3>
-		@card("sprout") {
-			<dt>Operating system</dt>
-			<dd>
-				@OSLogo(info.OS)
-				{ info.OS }
-			</dd>
-		}
-		<dt>Kernel</dt>
-		<dd>{ info.Kernel }</dd>
-		<dt>Architecture</dt>
-		<dd>{ info.Arch }</dd>
-		<dt>CPUs</dt>
-		<dd>{ fmt.Sprint(info.CPUs) }</dd>
-		<dt>Memory</dt>
-		<dd>{ info.MemFree } free of { info.MemTotal }</dd>
-		<dt>Uptime</dt>
-		<dd>{ info.Uptime }</dd>
-		<dt>Goroutines</dt>
-		<dd>{ fmt.Sprint(info.Goroutines) }</dd>
-		<dt>Runtime</dt>
-		<dd>{ info.GoVersion }</dd>
-		<dt>Server time</dt>
-		<dd>{ info.Now }</dd>
+		<div class="grid-3">
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						@osLogo(info.OS)
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Operating System</h3>
+						<p data-neo-card-description>{ info.OS }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/linux.svg") } alt="Kernel"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Kernel</h3>
+						<p data-neo-card-description>{ info.Kernel }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/amd64.svg") } alt="Architecture"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Architecture</h3>
+						<p data-neo-card-description>{ info.Arch }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/cpu.svg") } alt="CPUs"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>CPUs</h3>
+						<p data-neo-card-description>{ fmt.Sprint(info.CPUs) }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/ram.svg") } alt="Memory"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Memory</h3>
+						<p data-neo-card-description>{ info.MemFree } free of { info.MemTotal }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/clock.svg") } alt="Uptime"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Uptime</h3>
+						<p data-neo-card-description>{ info.Uptime }</p>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("images/go-logo-blue.png") } alt="Goroutines"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Golang Stats</h3>
+						<div class="flex gap-4">
+							<p data-neo-card-description>Goroutines: { fmt.Sprint(info.Goroutines) }</p>
+							<p data-neo-card-description>Version: { info.GoVersion }</p>
+						</div>
+					</div>
+				</div>
+			</neo-card>
+			<neo-card class="custom-card">
+				<div data-neo-card-inner>
+					<div data-neo-card-media>
+						<img class="os-logo" src={ StaticPath("icons/server.svg") } alt="Server time"/>
+					</div>
+					<div data-neo-card-header>
+						<h3 data-neo-card-title>Server time</h3>
+						<p data-neo-card-description>{ info.Now }</p>
+					</div>
+				</div>
+			</neo-card>
+		</div>
 	</section>
 }
 

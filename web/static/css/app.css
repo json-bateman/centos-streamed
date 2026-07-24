@@ -58,9 +58,29 @@
     border: 1px solid var(--accent);
 }
 
-.os-logo {
-    height: 1.1em;
+/* --- Custom Neo-* Styling --- */
+
+/* OS card: add class="os-card" to the <neo-card>. */
+.custom-card {
+    /* shadow-DOM css vars (pierce the boundary because they're inherited vars) */
+    --neo-card-media-default-height: 2.75rem;
+    /* logo band; default is 8rem */
+    --neo-card-padding: 0.6rem;
+    --neo-card-gap: 0.35rem;
+
+    overflow: hidden;
+    max-height: 180px;
+}
+
+neo-card [data-neo-card-media] {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+neo-card [data-neo-card-media]>.os-logo {
+    max-height: 80px;
     width: auto;
-    vertical-align: -0.2em;
-    margin-right: 0.4em;
+    margin: 0;
 }

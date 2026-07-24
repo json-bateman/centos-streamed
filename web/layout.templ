@@ -5,10 +5,6 @@ templ Layout(title string) {
 	<html
 		class="theme-sunshine"
 		data-signals="{_mode: (localStorage.getItem('neo-mode') || 'system')}"
-		data-class="{
-			dark:  $_mode === 'dark'  || ($_mode === 'system' &&  window.matchMedia('(prefers-color-scheme: dark)').matches),
-			light: $_mode === 'light' || ($_mode === 'system' && !window.matchMedia('(prefers-color-scheme: dark)').matches)
-		}"
 		lang="en"
 	>
 		<head>
@@ -90,7 +86,9 @@ templ Layout(title string) {
 						/>
 						<span class="brand-stream">Stream</span>
 					</header>
-					{ children... }
+					<div class="page-shell">
+						{ children... }
+					</div>
 				</div>
 			</div>
 		</body>

@@ -7,29 +7,35 @@
 #app-shell {
     display: flex;
     flex-direction: row;
-    gap: 0.5rem;
     min-height: 100vh;
-    container-type: inline-size; /* overlay breakpoint measures shell width, not viewport */
+    container-type: inline-size;
+    /* overlay breakpoint measures shell width, not viewport */
 }
 
 /* An in-flow (push-mode) sidebar should stretch the full height of the row. */
-#app-shell > neo-sidebar:not([overlay]):not([data-neo-sidebar-overlay]) {
+#app-shell>neo-sidebar:not([overlay]):not([data-neo-sidebar-overlay]) {
     height: auto;
     align-self: stretch;
 }
 
 #app-shell-main {
     flex: 1 1 auto;
-    min-width: 0; /* let the pane shrink instead of overflowing */
+    min-width: 0;
+    /* let the pane shrink instead of overflowing */
     display: flex;
     flex-direction: column;
+}
+
+.page-shell {
+    padding: 1rem 2rem 1rem 2rem;
 }
 
 #masthead {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: var(--page-edge-padding, 1rem) 0 0.5rem;
+    gap: 1rem;
+    padding: 1rem 0.5rem 1rem 0.5rem;
+    border-bottom: var(--muted) 1px solid;
 }
 
 #masthead .brand-logo {
@@ -43,7 +49,18 @@
     font-weight: 300;
     line-height: 1;
     letter-spacing: 0.01em;
-    color: var(--muted);
+    color: var(--page-fg);
     position: relative;
     top: 1px;
+}
+
+.home-card {
+    border: 1px solid var(--accent);
+}
+
+.os-logo {
+    height: 1.1em;
+    width: auto;
+    vertical-align: -0.2em;
+    margin-right: 0.4em;
 }

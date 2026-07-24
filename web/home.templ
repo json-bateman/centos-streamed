@@ -1,6 +1,9 @@
 package web
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 templ Page(info ServerInfo, procs []Process) {
 	@Layout("system monitor") {
@@ -17,30 +20,51 @@ templ Home(info ServerInfo, procs []Process) {
 	</main>
 }
 
+templ card(iconName string) {
+	<div class="home-card">
+		<header>
+			<neo-icon name={ fmt.Sprintf("%s", iconName) } data-neo-icon-base="/static/icons"></neo-icon>
+		</header>
+		{ children... }
+	</div>
+}
+
+templ OSLogo(osName string) {
+	switch  {
+		case strings.Contains(strings.ToLower(osName), "centos"):
+			<img class="os-logo" src={ StaticPath("images/os/centos.png") } alt="CentOS" width="20" height="20"/>
+		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
+			<img class="os-logo" src={ StaticPath("images/os/apple.png") } alt="macOS" width="20" height="20"/>
+	}
+}
+
 // ServerInfoCard is patched every couple of seconds over SSE with a fresh host snapshot.
 templ ServerInfoCard(info ServerInfo) {
 	<section>
 		<h3>Live server info</h3>
-		<dl>
+		@card("sprout") {
 			<dt>Operating system</dt>
-			<dd>{ info.OS }</dd>
-			<dt>Kernel</dt>
-			<dd>{ info.Kernel }</dd>
-			<dt>Architecture</dt>
-			<dd>{ info.Arch }</dd>
-			<dt>CPUs</dt>
-			<dd>{ fmt.Sprint(info.CPUs) }</dd>
-			<dt>Memory</dt>
-			<dd>{ info.MemFree } free of { info.MemTotal }</dd>
-			<dt>Uptime</dt>
-			<dd>{ info.Uptime }</dd>
-			<dt>Goroutines</dt>
-			<dd>{ fmt.Sprint(info.Goroutines) }</dd>
-			<dt>Runtime</dt>
-			<dd>{ info.GoVersion }</dd>
-			<dt>Server time</dt>
-			<dd>{ info.Now }</dd>
-		</dl>
+			<dd>
+				@OSLogo(info.OS)
+				{ info.OS }
+			</dd>
+		}
+		<dt>Kernel</dt>
+		<dd>{ info.Kernel }</dd>
+		<dt>Architecture</dt>
+		<dd>{ info.Arch }</dd>
+		<dt>CPUs</dt>
+		<dd>{ fmt.Sprint(info.CPUs) }</dd>
+		<dt>Memory</dt>
+		<dd>{ info.MemFree } free of { info.MemTotal }</dd>
+		<dt>Uptime</dt>
+		<dd>{ info.Uptime }</dd>
+		<dt>Goroutines</dt>
+		<dd>{ fmt.Sprint(info.Goroutines) }</dd>
+		<dt>Runtime</dt>
+		<dd>{ info.GoVersion }</dd>
+		<dt>Server time</dt>
+		<dd>{ info.Now }</dd>
 	</section>
 }
 

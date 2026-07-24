@@ -15,7 +15,7 @@ templ Layout(title string) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
-			<link rel="icon" type="image/x-icon" href={ StaticPath("images/rocket.png") }/>
+			<link rel="icon" type="image/png" href={ StaticPath("images/centos-favicon.png") }/>
 			<!--
 			  Morpheus color-mode controller. Sunshine defines :root.theme-sunshine
 			  (light) and :root.theme-sunshine.dark (dark), so a mode is just the
@@ -52,19 +52,47 @@ templ Layout(title string) {
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<body>
-			<!-- Morpheus-style color mode switcher (light / system / dark). -->
-			<neo-buttongroup
-				value="system"
-				aria-label="Color mode"
-				role="radiogroup"
-				data-attr:value="$_mode"
-				data-on:neo-buttongroup-change="$_mode = evt.detail.value; window.morpheusMode.apply(evt.detail.value)"
-			>
-				<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
-				<neo-button value="system" aria-label="System" role="radio" tabindex="0">◐</neo-button>
-				<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
-			</neo-buttongroup>
-			{ children... }
+			<div id="app-shell">
+				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1" data-neo-sidebar-ready open>
+					<!-- Morpheus-style color mode switcher (light / system / dark). -->
+					<neo-buttongroup
+						value="system"
+						aria-label="Color mode"
+						role="radiogroup"
+						data-attr:value="$_mode"
+						data-on:neo-buttongroup-change="$_mode = evt.detail.value; window.morpheusMode.apply(evt.detail.value)"
+					>
+						<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
+						<neo-button value="system" aria-label="System" role="radio" tabindex="0">◐</neo-button>
+						<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
+					</neo-buttongroup>
+					<div>something</div>
+				</neo-sidebar>
+				<div id="app-shell-main">
+					<header id="masthead">
+						<neo-button aria-label="Toggle sidebar" data-on:click="document.getElementById('app-sidebar').toggle()" role="button" tabindex="0">
+							<neo-icon name="menu" data-neo-icon-base="/static/icons">
+								<template shadowrootmode="open">
+									<svg class="lucide lucide-menu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" part="svg">
+										<path d="M4 5h16"></path>
+										<path d="M4 12h16"></path>
+										<path d="M4 19h16"></path>
+									</svg>
+								</template>
+							</neo-icon>
+						</neo-button>
+						<img
+							class="brand-logo"
+							src={ StaticPath("images/centos-stream.png") }
+							alt="CentOS Stream"
+							width="163"
+							height="48"
+						/>
+						<span class="brand-stream">Stream</span>
+					</header>
+					{ children... }
+				</div>
+			</div>
 		</body>
 		<!-- Datastar v1.0.0-RC.8 -->
 		<script type="module" src={ StaticPath("js/datastar.js") }></script>

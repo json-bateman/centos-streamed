@@ -2,15 +2,19 @@ package web
 
 import "fmt"
 
-templ Home(info ServerInfo, procs []Process) {
-	@Layout(info.Name + " — system monitor") {
-		<main data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
-			<h1>{ info.Name }</h1>
-			<p>live system monitor · datastar + chi · reading /proc</p>
-			@ServerInfoCard(info)
-			@ProcessTable(procs)
-		</main>
+templ Page(info ServerInfo, procs []Process) {
+	@Layout("system monitor") {
+		@Home(info, procs)
 	}
+}
+
+templ Home(info ServerInfo, procs []Process) {
+	<main id="home-morph-target" data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
+		<h1>{ info.Name }</h1>
+		<p>live system monitor · datastar + chi · reading /proc</p>
+		@ServerInfoCard(info)
+		@ProcessTable(procs)
+	</main>
 }
 
 // ServerInfoCard is patched every couple of seconds over SSE with a fresh host snapshot.

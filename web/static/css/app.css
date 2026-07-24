@@ -1,0 +1,49 @@
+/*
+ * App-specific styles
+ */
+
+/* App shell: sidebar + main laid out as a flex row so the sidebar PUSHES
+   content (in-flow) above the overlay breakpoint instead of floating over it. */
+#app-shell {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    min-height: 100vh;
+    container-type: inline-size; /* overlay breakpoint measures shell width, not viewport */
+}
+
+/* An in-flow (push-mode) sidebar should stretch the full height of the row. */
+#app-shell > neo-sidebar:not([overlay]):not([data-neo-sidebar-overlay]) {
+    height: auto;
+    align-self: stretch;
+}
+
+#app-shell-main {
+    flex: 1 1 auto;
+    min-width: 0; /* let the pane shrink instead of overflowing */
+    display: flex;
+    flex-direction: column;
+}
+
+#masthead {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--page-edge-padding, 1rem) 0 0.5rem;
+}
+
+#masthead .brand-logo {
+    height: 48px;
+    width: auto;
+    display: block;
+}
+
+#masthead .brand-stream {
+    font-size: 1.9rem;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: var(--muted);
+    position: relative;
+    top: 1px;
+}

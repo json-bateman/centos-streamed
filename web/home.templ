@@ -5,21 +5,12 @@ import (
 	"strings"
 )
 
-templ card(iconName string) {
-	<div class="home-card">
-		<header>
-			<neo-icon name={ fmt.Sprintf("%s", iconName) } data-neo-icon-base="/static/icons"></neo-icon>
-		</header>
-		{ children... }
-	</div>
-}
-
 templ osLogo(osName string) {
 	switch  {
 		case strings.Contains(strings.ToLower(osName), "centos"):
-			<img class="os-logo" src={ StaticPath("images/os/centos.png") } alt="CentOS" width="20" height="20"/>
+			<img src={ StaticPath("images/os/centos.png") } alt="CentOS" width="24" height="24"/>
 		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
-			<img class="os-logo" src={ StaticPath("images/os/apple.png") } alt="macOS" width="20" height="20"/>
+			<img src={ StaticPath("images/os/apple.png") } alt="macOS" width="24" height="24"/>
 	}
 }
 
@@ -32,7 +23,6 @@ templ Page(info ServerInfo, procs []Process) {
 templ Home(info ServerInfo, procs []Process) {
 	<main id="home-morph-target" data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
 		<h1>{ info.Name }</h1>
-		<h3>live system monitor</h3>
 		@ServerInfoCards(info)
 		@ProcessTable(procs)
 	</main>
@@ -40,99 +30,34 @@ templ Home(info ServerInfo, procs []Process) {
 
 templ ServerInfoCards(info ServerInfo) {
 	<section>
-		<h3>Live server info</h3>
-		<div class="grid-3">
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						@osLogo(info.OS)
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Operating System</h3>
-						<p data-neo-card-description>{ info.OS }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/linux.svg") } alt="Kernel"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Kernel</h3>
-						<p data-neo-card-description>{ info.Kernel }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/amd64.svg") } alt="Architecture"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Architecture</h3>
-						<p data-neo-card-description>{ info.Arch }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/cpu.svg") } alt="CPUs"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>CPUs</h3>
-						<p data-neo-card-description>{ fmt.Sprint(info.CPUs) }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/ram.svg") } alt="Memory"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Memory</h3>
-						<p data-neo-card-description>{ info.MemFree } free of { info.MemTotal }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/clock.svg") } alt="Uptime"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Uptime</h3>
-						<p data-neo-card-description>{ info.Uptime }</p>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("images/go-logo-blue.png") } alt="Goroutines"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Golang Stats</h3>
-						<div class="flex gap-4">
-							<p data-neo-card-description>Goroutines: { fmt.Sprint(info.Goroutines) }</p>
-							<p data-neo-card-description>Version: { info.GoVersion }</p>
-						</div>
-					</div>
-				</div>
-			</neo-card>
-			<neo-card class="custom-card">
-				<div data-neo-card-inner>
-					<div data-neo-card-media>
-						<img class="os-logo" src={ StaticPath("icons/server.svg") } alt="Server time"/>
-					</div>
-					<div data-neo-card-header>
-						<h3 data-neo-card-title>Server time</h3>
-						<p data-neo-card-description>{ info.Now }</p>
-					</div>
-				</div>
-			</neo-card>
+		<div class="flex gap-2">
+			This Webapp running
+			<img src={ StaticPath("images/go-logo-blue.png") } alt="Goroutines" width="60" height="24"/>
+		</div>
+		<div class="flex gap-4">
+			<span data-neo-card-description>Version: { info.GoVersion }</span>
+			<span data-neo-card-description>Goroutines: { fmt.Sprint(info.Goroutines) }</span>
+		</div>
+		<div class="server-info">
+			<header class="flex gap-2 items-center">
+				<img width="40px" height="40px" src={ StaticPath("icons/server.svg") } alt="Server time"/>
+				<h3>Live server info</h3>
+			</header>
+			<div class="flex gap-2">
+				@osLogo(info.OS)
+				Operating System
+			</div>
+			<div>{ info.OS }</div>
+			<div class="flex gap-2">
+				<img src={ StaticPath("images/Linux.png") } alt="Linux" width="24" height="24"/>
+				Kernel
+			</div>
+			<div>{ info.Kernel }</div>
+			<div class="flex gap-2">
+				<img src={ StaticPath("images/cpu.png") } alt="Architecture" width="24" height="24"/>
+				Architecture	
+			</div>
+			<div>{ info.Arch }</div>
 		</div>
 	</section>
 }

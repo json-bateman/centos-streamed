@@ -1,5 +1,19 @@
 package web
 
+import "strings"
+
+// BrandLogo renders the masthead brand for the host OS: the CentOS Stream
+templ BrandLogo(osName string) {
+	switch  {
+		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
+			<img class="brand-logo" src={ StaticPath("images/os/apple.png") } alt="macOS" width="48" height="48"/>
+			<span class="brand-stream">macOS</span>
+		default:
+			<img class="brand-logo" src={ StaticPath("images/centos-stream.png") } alt="CentOS Stream" width="163" height="48"/>
+			<span class="brand-stream">Stream</span>
+	}
+}
+
 templ Layout(title string) {
 	<!DOCTYPE html>
 	<html
@@ -49,7 +63,7 @@ templ Layout(title string) {
 		</head>
 		<body>
 			<div id="app-shell">
-				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1" data-neo-sidebar-ready open>
+				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1">
 					<!-- Morpheus-style color mode switcher (light / system / dark). -->
 					<neo-buttongroup
 						value="system"
@@ -77,14 +91,7 @@ templ Layout(title string) {
 								</template>
 							</neo-icon>
 						</neo-button>
-						<img
-							class="brand-logo"
-							src={ StaticPath("images/centos-stream.png") }
-							alt="CentOS Stream"
-							width="163"
-							height="48"
-						/>
-						<span class="brand-stream">Stream</span>
+						@BrandLogo(osPrettyName())
 					</header>
 					<div class="page-shell">
 						{ children... }

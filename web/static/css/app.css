@@ -58,29 +58,53 @@
     border: 1px solid var(--accent);
 }
 
-/* --- Custom Neo-* Styling --- */
-
-/* OS card: add class="os-card" to the <neo-card>. */
-.custom-card {
-    /* shadow-DOM css vars (pierce the boundary because they're inherited vars) */
-    --neo-card-media-default-height: 2.75rem;
-    /* logo band; default is 8rem */
-    --neo-card-padding: 0.6rem;
-    --neo-card-gap: 0.35rem;
-
-    overflow: hidden;
-    max-height: 180px;
+.server-info {
+    background: var(--neo-card-bg);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    align-items: start;
 }
 
-neo-card [data-neo-card-media] {
-    padding: 8px;
+.server-info header {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
 }
 
-neo-card [data-neo-card-media]>.os-logo {
-    max-height: 80px;
-    width: auto;
+.server-info header h3 {
     margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--page-fg);
+}
+
+.server-info header img {
+    opacity: 0.7;
+}
+
+.server-info>div.flex {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--muted-fg);
+    font-size: 0.95rem;
+}
+
+.server-info>div.flex img {
+    opacity: 0.8;
+}
+
+.server-info>div:not(.flex):not(header) {
+    font-size: 0.95rem;
+    color: var(--page-fg);
+    font-weight: 500;
 }

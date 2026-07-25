@@ -1,11 +1,8 @@
 /*
  * Morpheus component-token bridge.
  *
- * Extracted from the Morpheus site's style.css (:root blocks only). morpheus.css
- * styles the <neo-*> components using --neo-* variables, but only the theme
- * palette (--accent, --btn-bg, --page-fg, ...) is defined by the theme files.
- * These :root rules map the component tokens onto the palette, which is what
- * makes buttons (and selected buttongroup options) pick up the accent color.
+ * Extracted from the Morpheus site's style.css (:root blocks only).
+ * theme-sunshine.css has other style vars
  *
  * Load AFTER morpheus.css and the theme. Site-specific rules from style.css are
  * intentionally omitted so they don't override the theme.

@@ -10,22 +10,18 @@ templ osLogo(osName string) {
 		case strings.Contains(strings.ToLower(osName), "centos"):
 			<img src={ StaticPath("images/os/centos.png") } alt="CentOS" width="24" height="24"/>
 		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
-			<img src={ StaticPath("images/os/apple.png") } alt="macOS" width="24" height="24"/>
-	}
-}
-
-templ Page(info ServerInfo, procs []Process) {
-	@Layout("system monitor") {
-		@Home(info, procs)
+			<img class="svg" src={ StaticPath("icons/apple.svg") } alt="macOS" width="24" height="24"/>
 	}
 }
 
 templ Home(info ServerInfo, procs []Process) {
-	<main id="home-morph-target" data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
-		<h1>{ info.Name }</h1>
-		@ServerInfoCards(info)
-		@ProcessTable(procs)
-	</main>
+	@Layout("system monitor") {
+		<main data-init={ fmt.Sprintf("@get('%s')", SseUrl) }>
+			<h1>{ info.Name }</h1>
+			@ServerInfoCards(info)
+			@ProcessTable(procs)
+		</main>
+	}
 }
 
 templ ServerInfoCards(info ServerInfo) {
@@ -40,7 +36,7 @@ templ ServerInfoCards(info ServerInfo) {
 		</div>
 		<div class="server-info">
 			<header class="flex gap-2 items-center">
-				<img width="40px" height="40px" src={ StaticPath("icons/server.svg") } alt="Server time"/>
+				<img class="svg" width="40px" height="40px" src={ StaticPath("icons/server.svg") } alt="Server time"/>
 				<h3>Live server info</h3>
 			</header>
 			<div class="flex gap-2">

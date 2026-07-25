@@ -38,12 +38,6 @@
     border-bottom: var(--muted) 1px solid;
 }
 
-#masthead .brand-logo {
-    height: 48px;
-    width: auto;
-    display: block;
-}
-
 #masthead .brand-stream {
     font-size: 1.9rem;
     font-weight: 300;
@@ -107,4 +101,8 @@
     font-size: 0.95rem;
     color: var(--page-fg);
     font-weight: 500;
+}
+
+html.dark img.svg {
+    filter: invert(1) brightness(1.2);
 }

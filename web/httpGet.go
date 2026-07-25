@@ -13,7 +13,7 @@ const processLimit = 40
 
 func homePage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := Page(collectServerInfo(), collectProcesses(processLimit)).Render(r.Context(), w); err != nil {
+		if err := Home(collectServerInfo(), collectProcesses(processLimit)).Render(r.Context(), w); err != nil {
 			slog.Debug("render error", "component", "Page", "err", err)
 		}
 	}

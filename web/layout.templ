@@ -6,10 +6,10 @@ import "strings"
 templ BrandLogo(osName string) {
 	switch  {
 		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
-			<img class="brand-logo" src={ StaticPath("images/os/apple.png") } alt="macOS" width="48" height="48"/>
+			<img class="svg" src={ StaticPath("icons/apple.svg") } alt="macOS" width="48" height="48"/>
 			<span class="brand-stream">macOS</span>
 		default:
-			<img class="brand-logo" src={ StaticPath("images/centos-stream.png") } alt="CentOS Stream" width="163" height="48"/>
+			<img src={ StaticPath("images/centos-stream.png") } alt="CentOS Stream" width="163" height="48"/>
 			<span class="brand-stream">Stream</span>
 	}
 }
@@ -17,8 +17,9 @@ templ BrandLogo(osName string) {
 templ Layout(title string) {
 	<!DOCTYPE html>
 	<html
-		class="theme-sunshine"
-		data-signals="{_mode: (localStorage.getItem('neo-mode') || 'system')}"
+		data-signals="{_mode: localStorage.getItem('neo-mode') || 'system'}"
+		data-attr:class="'theme-sunshine ' + ($_mode === 'dark' ? 'dark' : 'light')"
+		data-effect="try { localStorage.setItem('neo-mode', $_mode); } catch (_) {}"
 		lang="en"
 	>
 		<head>
@@ -26,41 +27,9 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
 			<link rel="icon" type="image/png" href={ StaticPath("images/centos-favicon.png") }/>
-			<!--
-			  Morpheus color-mode controller. Sunshine defines :root.theme-sunshine
-			  (light) and :root.theme-sunshine.dark (dark), so a mode is just the
-			  light/dark class on <html>. We apply the saved mode before CSS paints
-			  to avoid a flash, and keep "system" in sync with the OS.
-			-->
-			<script>
-                (function () {
-                    var root = document.documentElement;
-                    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-                    function isDark(mode) {
-                        return mode === 'dark' || (mode === 'system' && mq.matches);
-                    }
-                    function paint(mode) {
-                        var dark = isDark(mode);
-                        root.classList.toggle('dark', dark);
-                        root.classList.toggle('light', !dark);
-                    }
-                    window.morpheusMode = {
-                        apply: function (mode) {
-                            localStorage.setItem('neo-mode', mode);
-                            paint(mode);
-                        },
-                        saved: function () {
-                            return localStorage.getItem('neo-mode') || 'system';
-                        },
-                    };
-                    paint(window.morpheusMode.saved());
-                    mq.addEventListener('change', function () {
-                        if (window.morpheusMode.saved() === 'system') paint('system');
-                    });
-                })();
-            </script>
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
+		<datastar-inspector></datastar-inspector>
 		<body>
 			<div id="app-shell">
 				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1">
@@ -70,7 +39,7 @@ templ Layout(title string) {
 						aria-label="Color mode"
 						role="radiogroup"
 						data-attr:value="$_mode"
-						data-on:neo-buttongroup-change="$_mode = evt.detail.value; window.morpheusMode.apply(evt.detail.value)"
+						data-on:neo-buttongroup-change="$_mode = evt.detail.value"
 					>
 						<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
 						<neo-button value="system" aria-label="System" role="radio" tabindex="0">◐</neo-button>
@@ -99,6 +68,8 @@ templ Layout(title string) {
 				</div>
 			</div>
 		</body>
+		<!-- Datastar Inspector-->
+		<script type="module" src={ StaticPath("js/datastar-inspector.js") }></script>
 		<!-- Datastar v1.0.0-RC.8 -->
 		<script type="module" src={ StaticPath("js/datastar.js") }></script>
 		<!-- Morpheus bundle — classic script (registers the <neo-*> custom elements). -->

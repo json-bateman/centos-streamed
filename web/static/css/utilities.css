@@ -24,6 +24,10 @@
     gap: 16px;
 }
 
+.page-fg {
+    color: var(--page-fg)
+}
+
 .grid-2 {
     display: grid;
     gap: 1rem;

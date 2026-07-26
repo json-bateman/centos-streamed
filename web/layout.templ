@@ -2,7 +2,6 @@ package web
 
 import "strings"
 
-// BrandLogo renders the masthead brand for the host OS: the CentOS Stream
 templ BrandLogo(osName string) {
 	switch  {
 		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
@@ -14,12 +13,11 @@ templ BrandLogo(osName string) {
 	}
 }
 
-templ Layout(title string) {
+templ Layout(title, commitHash string) {
 	<!DOCTYPE html>
 	<html
-		data-signals="{_mode: localStorage.getItem('neo-mode') || 'system'}"
+		data-signals="{_mode: localStorage.getItem('neo-mode') || 'dark'}"
 		data-attr:class="'theme-sunshine ' + ($_mode === 'dark' ? 'dark' : 'light')"
-		data-effect="try { localStorage.setItem('neo-mode', $_mode); } catch (_) {}"
 		lang="en"
 	>
 		<head>
@@ -27,6 +25,10 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
 			<link rel="icon" type="image/png" href={ StaticPath("images/centos-favicon.png") }/>
+			<script>
+				const mode = localStorage.getItem('neo-mode');
+				document.documentElement.className = 'theme-sunshine ' + mode;
+			</script>
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<datastar-inspector></datastar-inspector>
@@ -34,18 +36,26 @@ templ Layout(title string) {
 			<div id="app-shell">
 				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1">
 					<!-- Morpheus-style color mode switcher (light / system / dark). -->
-					<neo-buttongroup
-						value="system"
-						aria-label="Color mode"
-						role="radiogroup"
-						data-attr:value="$_mode"
-						data-on:neo-buttongroup-change="$_mode = evt.detail.value"
-					>
-						<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
-						<neo-button value="system" aria-label="System" role="radio" tabindex="0">◐</neo-button>
-						<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
-					</neo-buttongroup>
-					<div>something</div>
+					<header id="sidebar-header">
+						<neo-buttongroup
+							value="system"
+							aria-label="Color mode"
+							role="radiogroup"
+							data-attr:value="$_mode"
+							data-on:neo-buttongroup-change="
+                                $_mode = evt.detail.value;
+                                try { localStorage.setItem('neo-mode', $_mode); } catch (_) {};
+                            "
+						>
+							<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
+							<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
+						</neo-buttongroup>
+					</header>
+					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/">Home</a>
+					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/processes">Processes</a>
+					<footer id="sidebar-footer">
+						<span>{ commitHash }</span>
+					</footer>
 				</neo-sidebar>
 				<div id="app-shell-main">
 					<header id="masthead">

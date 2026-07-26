@@ -106,3 +106,18 @@
 html.dark img.svg {
     filter: invert(1) brightness(1.2);
 }
+
+#sidebar-header {
+    padding: 4px;
+    border-bottom: 1px solid var(--muted);
+    margin-bottom: 8px;
+}
+
+#sidebar-footer {
+    margin-top: auto;
+    padding: 8px;
+    border-top: 1px solid var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--muted);
+}

@@ -7,22 +7,6 @@ pushed to the browser over server-sent events.
 No database, no reverse proxy, no deploy tooling. Just a webserver reading
 `/proc`.
 
-## Structure
-
-```
-centos-streamed/
-├── env.go                 # config (PORT), package streamed
-├── cmd/main.go            # entrypoint → web.RunBlocking
-├── web/
-│   ├── httpServer.go      # chi routes + graceful HTTP server
-│   ├── httpGet.go         # home page + SSE loop (2s refresh)
-│   ├── serverinfo.go      # host facts from os-release / /proc / runtime
-│   ├── procinfo.go        # process list from /proc/<pid>
-│   ├── *.templ            # layout, home (info card + process table), 404
-│   └── static/            # CSS + theme JS (embedded, content-hashed)
-└── go.mod
-```
-
 ## How it works
 
 `cmd/main.go` starts a [chi] HTTP server. The home page renders a host-info card

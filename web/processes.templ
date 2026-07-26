@@ -1,0 +1,52 @@
+package web
+
+import "fmt"
+
+templ ProcessesPage(procs []Process) {
+	@Layout("404", CommitHash) {
+		@ProcessesSSE(procs)
+	}
+}
+
+templ ProcessesSSE(procs []Process) {
+	<main data-init={ fmt.Sprintf("@get('%s/sse')", ProcessesUrl) }>
+		Processes
+		@ProcessesTable(procs)
+	</main>
+}
+
+// ProcessTable is patched over SSE with a fresh /proc snapshot, sorted by memory.
+templ ProcessesTable(procs []Process) {
+	<section>
+		<h3>Processes — top { fmt.Sprint(len(procs)) } by memory</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>PID</th>
+					<th>User</th>
+					<th>Command</th>
+					<th>State</th>
+					<th>Threads</th>
+					<th>Memory</th>
+					<th>CPU time</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(procs) == 0 {
+					<tr><td colspan="7">No processes found (is this running on Linux?).</td></tr>
+				}
+				for _, p := range procs {
+					<tr>
+						<td>{ fmt.Sprint(p.PID) }</td>
+						<td>{ p.User }</td>
+						<td>{ p.Command }</td>
+						<td>{ p.State }</td>
+						<td>{ fmt.Sprint(p.Threads) }</td>
+						<td>{ p.RSS }</td>
+						<td>{ p.CPUTime }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</section>
+}

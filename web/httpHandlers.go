@@ -30,11 +30,14 @@ func homePageSse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
 
+		ticker := time.NewTicker(time.Duration(UpdateTick) * time.Second)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-r.Context().Done():
 				return
-			case <-time.After(time.Duration(UpdateTick) * time.Second):
+			case <-ticker.C:
 				if err := sse.PatchElementTempl(HomeSSE(collectServerInfo())); err != nil {
 					return
 				}
@@ -58,11 +61,14 @@ func processesPageSse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
 
+		ticker := time.NewTicker(time.Duration(UpdateTick) * time.Second)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-r.Context().Done():
 				return
-			case <-time.After(time.Duration(UpdateTick) * time.Second):
+			case <-ticker.C:
 				if err := sse.PatchElementTempl(ProcessesSSE(collectProcesses(processLimit))); err != nil {
 					return
 				}
@@ -130,11 +136,14 @@ func etcPageSSE() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
 
+		ticker := time.NewTicker(time.Duration(UpdateTick) * time.Second)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-r.Context().Done():
 				return
-			case <-time.After(time.Duration(UpdateTick) * time.Second):
+			case <-ticker.C:
 				caddyConfig := readCaddyfile()
 				containers := readContainerFiles()
 				if err := sse.PatchElementTempl(EtcPageSSE(caddyConfig, containers)); err != nil {

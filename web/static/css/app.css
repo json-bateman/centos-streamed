@@ -106,6 +106,42 @@ html.dark img.svg {
     color: var(--muted);
 }
 
+/* Configuration list styles */
+.config-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.config-item {
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.config-item summary {
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.5rem;
+}
+
+.config-item pre {
+    background: var(--neo-card-bg);
+    border-top: 1px solid var(--muted);
+    margin: 0.5rem -0.5rem -0.5rem -0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+}
+
+.config-code {
+    background: var(--neo-card-bg);
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    padding: 1rem;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 /* Table styling */
 table {
     width: 100%;

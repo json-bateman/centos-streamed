@@ -1,0 +1,43 @@
+package web
+
+import "fmt"
+
+templ EtcPage(caddyConfig string, containers []struct{ Name, Content string }) {
+	@Layout("etc", CommitHash) {
+		@EtcPageSSE(caddyConfig, containers)
+	}
+}
+
+templ EtcPageSSE(caddyConfig string, containers []struct{ Name, Content string }) {
+	<main id="morph-target" data-init={ fmt.Sprintf("@get('%s/sse')", EtcUrl) }>
+		<h3 class="mb-4">Web Files Configuration</h3>
+		@ContainersList(containers)
+		<br/>
+		@CaddyConfig(caddyConfig)
+	</main>
+}
+
+templ ContainersList(containers []struct{ Name, Content string }) {
+	<section>
+		<h4 class="color-muted">Container Files (/etc/containers/systemd/)</h4>
+		if len(containers) == 0 {
+			<p class="color-muted">No .container files found</p>
+		} else {
+			<div class="config-list">
+				for _, container := range containers {
+					<details data-ignore-morph class="config-item">
+						<summary>{ container.Name }</summary>
+						<pre>{ container.Content }</pre>
+					</details>
+				}
+			</div>
+		}
+	</section>
+}
+
+templ CaddyConfig(caddyConfig string) {
+	<section>
+		<h4 class="color-muted">Caddy Configuration (/etc/systemd/caddy/)</h4>
+		<pre class="config-code">{ caddyConfig }</pre>
+	</section>
+}

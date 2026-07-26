@@ -48,6 +48,11 @@
     --app-shell-height: calc(1em + round(calc(var(--page-spacing, .25rem) * 2), 1px)*2 + 3px + round(calc(var(--page-spacing, .25rem) * 3), 1px)*2);
 }
 
+/* Overrides I like */
+neo-select {
+    --neo-select-min-width: 0px;
+}
+
 body {
     font-family: var(--page-font-family);
     color: var(--page-fg);

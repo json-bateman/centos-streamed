@@ -19,7 +19,7 @@ type Process struct {
 	PID     int
 	User    string // resolved from the real UID, falling back to the numeric id
 	Command string // the kernel "comm" name
-	State   string // human label: running, sleeping, zombie, …
+	State   string // process state (running, sleeping, etc.)
 	Threads int
 	RSS     string // resident memory, human-formatted
 	CPUTime string // cumulative user+system CPU time, e.g. "12.3s"
@@ -27,12 +27,22 @@ type Process struct {
 	rssKiB int64 // kept for sorting; not rendered directly
 }
 
+type MemInfo struct {
+	MemTotal float64
+	MemFree  float64
+}
+
+type ProcessInfo struct {
+	Processes []Process
+	MemInfo   *MemInfo
+}
+
 // collectProcesses walks /proc and returns the processes using the most
 // resident memory, most first. limit caps the number returned (<= 0 means all).
-func collectProcesses(limit int) []Process {
+func collectProcesses(limit int) *ProcessInfo {
 	entries, err := os.ReadDir("/proc")
 	if err != nil {
-		return nil
+		return &ProcessInfo{Processes: []Process{}, MemInfo: &MemInfo{}}
 	}
 
 	uidCache := map[string]string{}
@@ -53,7 +63,17 @@ func collectProcesses(limit int) []Process {
 	if limit > 0 && len(procs) > limit {
 		procs = procs[:limit]
 	}
-	return procs
+
+	total, free := meminfo()
+	info := &MemInfo{
+		MemTotal: total,
+		MemFree:  free,
+	}
+
+	return &ProcessInfo{
+		Processes: procs,
+		MemInfo:   info,
+	}
 }
 
 // readProcess reads one process. It returns ok=false if the process vanished
@@ -77,7 +97,7 @@ func readProcess(pid int, uidCache map[string]string) (Process, bool) {
 		case "Name":
 			p.Command = val
 		case "State":
-			p.State = stateLabel(val) // e.g. "S (sleeping)" -> "sleeping"
+			p.State = stateLabel(val)
 		case "Threads":
 			p.Threads, _ = strconv.Atoi(val)
 		case "VmRSS":
@@ -176,4 +196,30 @@ func humanKiB(kib int64) string {
 	default:
 		return strconv.FormatInt(kib, 10) + " KiB"
 	}
+}
+
+// meminfo returns MemTotal and MemAvailable from /proc/meminfo in GiB.
+func meminfo() (total, free float64) {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 0, 0
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		kb, err := strconv.ParseFloat(fields[1], 64)
+		if err != nil {
+			continue
+		}
+		gib := kb / 1024 / 1024
+		switch fields[0] {
+		case "MemTotal:":
+			total = gib
+		case "MemAvailable:":
+			free = gib
+		}
+	}
+	return
 }

@@ -51,8 +51,8 @@ templ Layout(title, commitHash string) {
 							<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
 						</neo-buttongroup>
 					</header>
-					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/">Home</a>
-					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/processes">Processes</a>
+					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/">/home</a>
+					<a data-neo-link variant="button-ghost" class="app-nav-link" href={ ProcessesUrl }>/proc</a>
 					<footer id="sidebar-footer">
 						<span>{ commitHash }</span>
 					</footer>

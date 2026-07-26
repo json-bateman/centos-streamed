@@ -29,7 +29,7 @@ var CommitHash = "dev"
 
 const (
 	HomeUrl      = "/"
-	ProcessesUrl = "/processes"
+	ProcessesUrl = "/proc"
 )
 
 // StaticPath returns the hashed URL for a file under static/, e.g.
@@ -102,7 +102,7 @@ func RunBlocking(setupCtx context.Context) error {
 
 func homePage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := Home(collectServerInfo(), collectProcesses(processLimit)).Render(r.Context(), w); err != nil {
+		if err := Home(collectServerInfo()).Render(r.Context(), w); err != nil {
 			slog.Debug("render error", "component", "Page", "err", err)
 		}
 	}
@@ -120,7 +120,7 @@ func homePageSse() http.HandlerFunc {
 			case <-r.Context().Done():
 				return
 			case <-ticker.C:
-				if err := sse.PatchElementTempl(HomeSSE(collectServerInfo(), collectProcesses(processLimit))); err != nil {
+				if err := sse.PatchElementTempl(HomeSSE(collectServerInfo())); err != nil {
 					return
 				}
 			}

@@ -48,59 +48,43 @@
     top: 1px;
 }
 
-.home-card {
-    border: 1px solid var(--accent);
-}
-
 .server-info {
     background: var(--neo-card-bg);
     border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 4px;
+    padding-bottom: 0.5rem;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.5rem 1rem;
     align-items: start;
+    max-width: 400px;
 }
 
 .server-info header {
     grid-column: 1 / -1;
     display: flex;
+    padding: 0.5rem;
     align-items: center;
     gap: 0.75rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--accent);
     margin-bottom: 0.5rem;
 }
 
 .server-info header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--page-fg);
-}
-
-.server-info header img {
-    opacity: 0.7;
 }
 
 .server-info>div.flex {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 0rem 0.5rem 0rem 0.5rem;
     font-weight: 500;
     color: var(--muted-fg);
     font-size: 0.95rem;
-}
-
-.server-info>div.flex img {
-    opacity: 0.8;
-}
-
-.server-info>div:not(.flex):not(header) {
-    font-size: 0.95rem;
-    color: var(--page-fg);
-    font-weight: 500;
 }
 
 html.dark img.svg {
@@ -120,4 +104,93 @@ html.dark img.svg {
     font-size: 0.75rem;
     text-align: center;
     color: var(--muted);
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+table th,
+table td {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--muted);
+}
+
+table th {
+    background-color: var(--btn-bg);
+    font-weight: 600;
+    color: var(--btn-fg);
+    position: sticky;
+    top: 0;
+}
+
+table tbody tr:hover {
+    background-color: var(--btn-hover-bg);
+}
+
+/* Text truncation utility */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.progress-box {
+    padding: 0.5rem;
+    background: var(--neo-card-bg);
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    max-width: 240px;
+    margin: 1rem 0rem 1rem 0rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    section>table {
+        font-size: 0.85rem;
+        table-layout: fixed;
+    }
+
+    table th,
+    table td {
+        padding: 0.5rem 0.3rem;
+    }
+
+    table td {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Create horizontal scroll wrapper */
+    section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    section>table {
+        min-width: 600px;
+    }
+
+    .page-shell {
+        padding: 0.5rem 1rem 0.5rem 1rem;
+    }
+
+    /* Truncate long strings in header */
+    #masthead .brand-stream {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #masthead {
+        gap: 0.5rem;
+    }
 }

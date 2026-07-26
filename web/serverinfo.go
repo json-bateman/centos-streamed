@@ -20,15 +20,12 @@ type ServerInfo struct {
 	CPUs       int
 	GoVersion  string
 	Uptime     string
-	MemTotal   string
-	MemFree    string
 	Now        string
 	Goroutines int
 }
 
 // collectServerInfo gathers a fresh snapshot of host information.
 func collectServerInfo() ServerInfo {
-	total, free := meminfo()
 	name, err := os.Hostname()
 	if err != nil {
 		name = "unknown-host"
@@ -41,9 +38,7 @@ func collectServerInfo() ServerInfo {
 		CPUs:       runtime.NumCPU(),
 		GoVersion:  runtime.Version(),
 		Uptime:     uptime(),
-		MemTotal:   total,
-		MemFree:    free,
-		Now:        time.Now().Format("2006-01-02 15:04:05 MST"),
+		Now:        time.Now().UTC().Format("15:04:05 MST"),
 		Goroutines: runtime.NumGoroutine(),
 	}
 }
@@ -98,32 +93,4 @@ func uptime() string {
 	default:
 		return strconv.Itoa(mins) + "m"
 	}
-}
-
-// meminfo returns MemTotal and MemAvailable from /proc/meminfo, formatted in GiB.
-func meminfo() (total, free string) {
-	total, free = "unknown", "unknown"
-	data, err := os.ReadFile("/proc/meminfo")
-	if err != nil {
-		return
-	}
-	for _, line := range strings.Split(string(data), "\n") {
-		fields := strings.Fields(line)
-		if len(fields) < 2 {
-			continue
-		}
-		kb, err := strconv.ParseFloat(fields[1], 64)
-		if err != nil {
-			continue
-		}
-		gib := kb / 1024 / 1024
-		formatted := strconv.FormatFloat(gib, 'f', 1, 64) + " GiB"
-		switch fields[0] {
-		case "MemTotal:":
-			total = formatted
-		case "MemAvailable:":
-			free = formatted
-		}
-	}
-	return
 }

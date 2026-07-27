@@ -3,18 +3,14 @@ package web
 import "fmt"
 
 templ EtcPage(caddyConfig string, containers []struct{ Name, Content string }) {
-	@Layout("etc", CommitHash) {
-		@EtcPageSSE(caddyConfig, containers)
+	@Layout("/etc", CommitHash) {
+		<main id="morph-target" data-init={ fmt.Sprintf("@get('%s/sse')", EtcUrl) }>
+			<h3 class="mb-4">Web Files Configuration</h3>
+			@ContainersList(containers)
+			<br/>
+			@CaddyConfig(caddyConfig)
+		</main>
 	}
-}
-
-templ EtcPageSSE(caddyConfig string, containers []struct{ Name, Content string }) {
-	<main id="morph-target" data-init={ fmt.Sprintf("@get('%s/sse')", EtcUrl) }>
-		<h3 class="mb-4">Web Files Configuration</h3>
-		@ContainersList(containers)
-		<br/>
-		@CaddyConfig(caddyConfig)
-	</main>
 }
 
 templ ContainersList(containers []struct{ Name, Content string }) {

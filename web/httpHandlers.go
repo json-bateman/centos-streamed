@@ -38,7 +38,7 @@ func homePageSse() http.HandlerFunc {
 			case <-r.Context().Done():
 				return
 			case <-ticker.C:
-				if err := sse.PatchElementTempl(HomeSSE(collectServerInfo())); err != nil {
+				if err := sse.PatchElementTempl(Home(collectServerInfo())); err != nil {
 					return
 				}
 			}
@@ -69,7 +69,7 @@ func processesPageSse() http.HandlerFunc {
 			case <-r.Context().Done():
 				return
 			case <-ticker.C:
-				if err := sse.PatchElementTempl(ProcessesSSE(collectProcesses(processLimit))); err != nil {
+				if err := sse.PatchElementTempl(ProcessesPage(collectProcesses(processLimit))); err != nil {
 					return
 				}
 			}
@@ -146,7 +146,7 @@ func etcPageSSE() http.HandlerFunc {
 			case <-ticker.C:
 				caddyConfig := readCaddyfile()
 				containers := readContainerFiles()
-				if err := sse.PatchElementTempl(EtcPageSSE(caddyConfig, containers)); err != nil {
+				if err := sse.PatchElementTempl(EtcPage(caddyConfig, containers)); err != nil {
 					return
 				}
 			}

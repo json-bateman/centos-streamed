@@ -35,7 +35,7 @@ templ Layout(title, commitHash string) {
 		<body>
 			<div id="app-shell">
 				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1">
-					<!-- Morpheus-style color mode switcher (light / system / dark). -->
+					<!-- Morpheus-style color mode switcher (light / dark). -->
 					<header id="sidebar-header">
 						<neo-buttongroup
 							value="system"
@@ -43,9 +43,9 @@ templ Layout(title, commitHash string) {
 							role="radiogroup"
 							data-attr:value="$_mode"
 							data-on:neo-buttongroup-change="
-                                $_mode = evt.detail.value;
-                                try { localStorage.setItem('neo-mode', $_mode); } catch (_) {};
-                            "
+                $_mode = evt.detail.value;
+                try { localStorage.setItem('neo-mode', $_mode); } catch (_) {};
+            "
 						>
 							<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
 							<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>

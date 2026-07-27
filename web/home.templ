@@ -15,16 +15,12 @@ templ osLogo(osName string) {
 }
 
 templ Home(info ServerInfo) {
-	@Layout("system monitor", CommitHash) {
-		@HomeSSE(info)
+	@Layout("/home", CommitHash) {
+		<main id="morph-target" data-init={ fmt.Sprintf("@get('/sse')") }>
+			<h1>{ info.Name }</h1>
+			@ServerInfoCards(info)
+		</main>
 	}
-}
-
-templ HomeSSE(info ServerInfo) {
-	<main id="morph-target" data-init={ fmt.Sprintf("@get('/sse')") }>
-		<h1>{ info.Name }</h1>
-		@ServerInfoCards(info)
-	</main>
 }
 
 templ ServerInfoCards(info ServerInfo) {

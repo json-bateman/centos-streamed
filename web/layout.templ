@@ -41,12 +41,12 @@ templ Layout(title, commitHash string) {
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<datastar-inspector></datastar-inspector>
-		<body data-signals="{sidebarOpen: window.matchMedia('(min-width: 768px)').matches}">
+		<body data-signals="{sidebarOpen: false}">
 			<div id="app-shell">
 				<aside
 					id="sidebar"
 					data-class="{open: $sidebarOpen}"
-					data-on:keydown__window="evt.key === 'Escape' && ($sidebarOpen = false)"
+					data-on:keydown__window="evt.key === 'Escape' && ($sidebarOpen = !$sidebarOpen)"
 					data-on:click__outside="window.matchMedia('(max-width: 768px)').matches && !evt.target.closest('#sidebar-toggle') && ($sidebarOpen = false)"
 				>
 					<nav id="sidebar-nav">

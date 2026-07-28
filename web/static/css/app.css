@@ -107,7 +107,7 @@ img.svg {
 }
 
 .server-info {
-    background: oklch(from var(--background) l c h / 0.8);
+    background: var(--surface);
     border: 1px solid var(--accent);
     border-radius: 4px;
     padding-bottom: 0.5rem;
@@ -179,7 +179,7 @@ img.svg {
 }
 
 .config-item pre {
-    background: oklch(from var(--background) l c h / 0.8);
+    background: var(--surface);
     border-top: 1px solid oklch(from var(--secondary) l c h / 0.6);
     margin: 0.5rem -0.5rem -0.5rem -0.5rem;
     padding: 1rem;
@@ -188,7 +188,7 @@ img.svg {
 }
 
 .config-code {
-    background: oklch(from var(--background) l c h / 0.8);
+    background: var(--surface);
     border: 1px solid oklch(from var(--secondary) l c h / 0.6);
     border-radius: 4px;
     padding: 1rem;
@@ -206,7 +206,7 @@ img.svg {
 
 .progress-box {
     padding: 0.5rem;
-    background: oklch(from var(--background) l c h / 0.8);
+    background: var(--surface);
     border: 1px solid oklch(from var(--secondary) l c h / 0.6);
     border-radius: 4px;
     max-width: 240px;

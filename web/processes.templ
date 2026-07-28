@@ -4,7 +4,7 @@ import "fmt"
 
 templ ProcessesPage(procs *ProcessInfo) {
 	@Layout("/procs", CommitHash) {
-		<main id="morph-target" data-init={ fmt.Sprintf("@get('%s/sse')", ProcessesUrl) }>
+		<main data-init={ fmt.Sprintf("@get('%s/sse')", ProcessesUrl) }>
 			<h3>Processes</h3>
 			@ProcessesTable(procs)
 		</main>

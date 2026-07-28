@@ -23,6 +23,7 @@ templ Layout(title, commitHash string) {
 		data-signals="{theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')}"
 		data-attr:data-theme="$theme"
 		data-effect="localStorage.setItem('theme', $theme)"
+		data-on:keydown__window="hotkey(evt, 't') && ($theme = $theme === 'dark' ? 'light' : 'dark')"
 		lang="en"
 	>
 		<head>
@@ -37,6 +38,12 @@ templ Layout(title, commitHash string) {
                     const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                     document.documentElement.setAttribute('data-theme', theme);
                 })();
+                // True when `key` was pressed bare: no modifiers, not while
+                // typing in a form field. Shared by all data-on:keydown hotkeys.
+                window.hotkey = (evt, key) =>
+                    evt.key === key &&
+                    !evt.ctrlKey && !evt.metaKey && !evt.altKey &&
+                    !evt.target.closest('input, textarea, select, [contenteditable]');
             </script>
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
@@ -46,7 +53,7 @@ templ Layout(title, commitHash string) {
 				<aside
 					id="sidebar"
 					data-class="{open: $sidebarOpen}"
-					data-on:keydown__window="evt.key === 'Escape' && ($sidebarOpen = !$sidebarOpen)"
+					data-on:keydown__window="hotkey(evt, 's') && ($sidebarOpen = !$sidebarOpen)"
 					data-on:click__outside="window.matchMedia('(max-width: 768px)').matches && !evt.target.closest('#sidebar-toggle') && ($sidebarOpen = false)"
 				>
 					<nav id="sidebar-nav">

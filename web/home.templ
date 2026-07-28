@@ -16,7 +16,7 @@ templ osLogo(osName string) {
 
 templ Home(info ServerInfo) {
 	@Layout("/home", CommitHash) {
-		<main id="morph-target" data-init={ fmt.Sprintf("@get('/sse')") }>
+		<main data-init={ fmt.Sprintf("@get('/sse')") }>
 			<h1>{ info.Name }</h1>
 			@ServerInfoCards(info)
 		</main>

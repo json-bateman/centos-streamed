@@ -1,14 +1,9 @@
-/*
- * Single stylesheet entry point. Imported files are resolved relative to this
- * file's URL, so hashfs serves them at their plain /static/css/ paths.
- *
- * Order matters (later imports win at equal specificity):
- */
-@import "reset.css";
+@import "./open-props.css";
 
-@import "morpheus.css";
-@import "style.css";
-@import "theme-sunshine.css";
+@import "reset.css" layer(reset);
+@import "theme.css" layer(theme);
+@import "html-elements.css" layer(elements);
+@import "utilities.css" layer(utilities);
+@import "app.css" layer(app);
 
-@import "app.css";
-@import "utilities.css";
+@layer reset, theme, elements, utilities, app;

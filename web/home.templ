@@ -30,8 +30,8 @@ templ ServerInfoCards(info ServerInfo) {
 			<img src={ StaticPath("images/go-logo-blue.png") } alt="Goroutines" width="60" height="24"/>
 		</div>
 		<div class="flex gap-4">
-			<span data-neo-card-description>Version: { info.GoVersion[:8] }</span>
-			<span data-neo-card-description>Goroutines: { fmt.Sprint(info.Goroutines) }</span>
+			<span>Version: { info.GoVersion[:8] }</span>
+			<span>Goroutines: { fmt.Sprint(info.Goroutines) }</span>
 		</div>
 		<br/>
 		<div class="server-info">

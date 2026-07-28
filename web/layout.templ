@@ -5,19 +5,24 @@ import "strings"
 templ BrandLogo(osName string) {
 	switch  {
 		case strings.Contains(strings.ToLower(osName), "darwin") || strings.Contains(strings.ToLower(osName), "mac"):
-			<img class="svg" src={ StaticPath("icons/apple.svg") } alt="macOS" width="48" height="48"/>
-			<span class="brand-stream">macOS</span>
+			<div class="flex items-center gap-4">
+				<img class="svg" src={ StaticPath("icons/apple.svg") } alt="macOS" width="48" height="48"/>
+				<span class="brand-stream">macOS</span>
+			</div>
 		default:
-			<img src={ StaticPath("images/centos-stream.png") } alt="CentOS Stream" width="163" height="48"/>
-			<span class="brand-stream">Stream</span>
+			<div class="flex items-center gap-4">
+				<img src={ StaticPath("images/centos-stream.png") } alt="CentOS Stream" width="163" height="48"/>
+				<span class="brand-stream">Stream</span>
+			</div>
 	}
 }
 
 templ Layout(title, commitHash string) {
 	<!DOCTYPE html>
 	<html
-		data-signals="{_mode: localStorage.getItem('neo-mode') || 'dark'}"
-		data-attr:class="'theme-sunshine ' + ($_mode === 'dark' ? 'dark' : 'light')"
+		data-signals="{theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')}"
+		data-attr:data-theme="$theme"
+		data-effect="localStorage.setItem('theme', $theme)"
 		lang="en"
 	>
 		<head>
@@ -25,53 +30,56 @@ templ Layout(title, commitHash string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
 			<link rel="icon" type="image/png" href={ StaticPath("images/centos-favicon.png") }/>
+			<!-- Need this IIFE to  run before CSS loads,
+      prevents theme flash since D* is deferred with type="module" -->
 			<script>
-				const mode = localStorage.getItem('neo-mode');
-				document.documentElement.className = 'theme-sunshine ' + mode;
-			</script>
+                (function() {
+                    const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                    document.documentElement.setAttribute('data-theme', theme);
+                })();
+            </script>
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<datastar-inspector></datastar-inspector>
-		<body>
+		<body data-signals="{sidebarOpen: window.matchMedia('(min-width: 768px)').matches}">
 			<div id="app-shell">
-				<neo-sidebar id="app-sidebar" role="complementary" tabindex="-1">
-					<!-- Morpheus-style color mode switcher (light / dark). -->
-					<header id="sidebar-header">
-						<neo-buttongroup
-							value="system"
-							aria-label="Color mode"
-							role="radiogroup"
-							data-attr:value="$_mode"
-							data-on:neo-buttongroup-change="
-                $_mode = evt.detail.value;
-                try { localStorage.setItem('neo-mode', $_mode); } catch (_) {};
-            "
-						>
-							<neo-button value="light" aria-label="Light" role="radio" tabindex="0">☀</neo-button>
-							<neo-button value="dark" aria-label="Dark" role="radio" tabindex="0">☾</neo-button>
-						</neo-buttongroup>
-					</header>
-					<a data-neo-link variant="button-ghost" class="app-nav-link" href="/">/home</a>
-					<a data-neo-link variant="button-ghost" class="app-nav-link" href={ ProcessesUrl }>/proc</a>
-					<a data-neo-link variant="button-ghost" class="app-nav-link" href={ EtcUrl }>/etc</a>
-					<footer id="sidebar-footer">
-						<span>{ commitHash }</span>
-					</footer>
-				</neo-sidebar>
+				<aside
+					id="sidebar"
+					data-class="{open: $sidebarOpen}"
+					data-on:keydown__window="evt.key === 'Escape' && ($sidebarOpen = false)"
+					data-on:click__outside="window.matchMedia('(max-width: 768px)').matches && !evt.target.closest('#sidebar-toggle') && ($sidebarOpen = false)"
+				>
+					<nav id="sidebar-nav">
+						<a href={ templ.SafeURL(HomeUrl) }>Home</a>
+						<a href={ templ.SafeURL(ProcessesUrl) }>Processes</a>
+						<a href={ templ.SafeURL(EtcUrl) }>Config</a>
+					</nav>
+					<div id="sidebar-footer">{ commitHash }</div>
+				</aside>
 				<div id="app-shell-main">
 					<header id="masthead">
-						<neo-button aria-label="Toggle sidebar" data-on:click="document.getElementById('app-sidebar').toggle()" role="button" tabindex="0">
-							<neo-icon name="menu" data-neo-icon-base="/static/icons">
-								<template shadowrootmode="open">
-									<svg class="lucide lucide-menu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" part="svg">
-										<path d="M4 5h16"></path>
-										<path d="M4 12h16"></path>
-										<path d="M4 19h16"></path>
-									</svg>
-								</template>
-							</neo-icon>
-						</neo-button>
-						@BrandLogo(osPrettyName())
+						<div class="flex gap-4">
+							<button
+								id="sidebar-toggle"
+								type="button"
+								class="cursor-pointer"
+								aria-label="Toggle sidebar"
+								data-on:click="$sidebarOpen = !$sidebarOpen"
+							>☰</button>
+							@BrandLogo(osPrettyName())
+						</div>
+						<fieldset class="cs-buttongroup" role="radiogroup" aria-label="Color mode">
+							<label>
+								<input type="radio" value="light" data-bind:theme/>
+								<iconify-icon icon="material-symbols-light:sunny-rounded"></iconify-icon>
+								Light
+							</label>
+							<label>
+								<input type="radio" value="dark" data-bind:theme/>
+								<iconify-icon icon="material-symbols-light:moon-stars"></iconify-icon>
+								Dark
+							</label>
+						</fieldset>
 					</header>
 					<div class="page-shell">
 						{ children... }
@@ -79,6 +87,8 @@ templ Layout(title, commitHash string) {
 				</div>
 			</div>
 		</body>
+		<!-- Iconify -->
+		<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2"></script>
 		<!-- Datastar Inspector-->
 		<script type="module" src={ StaticPath("js/datastar-inspector.js") }></script>
 		<!-- Datastar v1.0.0-RC.8 -->

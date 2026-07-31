@@ -213,6 +213,40 @@ img.svg {
     margin: 1rem 0rem 1rem 0rem;
 }
 
+/* Plain progress bar: width driven by --p, set inline by the server. */
+.progress-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.progress-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.progress-bar-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: oklch(from var(--secondary) l c h / 0.25);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: var(--p, 0%);
+    background: var(--primary);
+    border-radius: inherit;
+    transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-bar-detail {
+    font-size: 0.75rem;
+    color: oklch(from var(--secondary) l c h / 0.9);
+}
+
 /* Mobile */
 @media (max-width: 768px) {
     .page-shell {

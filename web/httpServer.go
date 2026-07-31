@@ -29,6 +29,7 @@ const (
 	HomeUrl      = "/"
 	ProcessesUrl = "/proc"
 	EtcUrl       = "/etc"
+	SshUrl       = "/ssh"
 )
 
 // StaticPath returns the hashed URL for a file under static/, e.g.
@@ -60,6 +61,8 @@ func setupRoutes() chi.Router {
 	r.Get(EtcUrl, etcPage())
 	r.Get(EtcUrl+"/sse", etcPageSSE())
 
+	r.Get(SshUrl, sshPage())
+	r.Get(SshUrl+"/sse", sshPageSSE())
 	// Serve files embedded in the binary.
 	r.Handle("/static/*", hashfs.FileServer(StaticSys))
 

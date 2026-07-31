@@ -2,6 +2,29 @@ package web
 
 import "fmt"
 
+templ progressBar(label string, percent int, detail string) {
+	<div
+		class="progress-bar"
+		role="progressbar"
+		aria-label={ label }
+		aria-valuemin="0"
+		aria-valuemax="100"
+		aria-valuenow={ fmt.Sprint(percent) }
+		style={ templ.SafeCSS(fmt.Sprintf("--p: %d%%", percent)) }
+	>
+		<div class="progress-bar-header">
+			<span>{ label }</span>
+			<span>{ fmt.Sprint(percent) }%</span>
+		</div>
+		<div class="progress-bar-track">
+			<div class="progress-bar-fill"></div>
+		</div>
+		if detail != "" {
+			<div class="progress-bar-detail">{ detail }</div>
+		}
+	</div>
+}
+
 templ ProcessesPage(procs *ProcessInfo) {
 	@Layout("/procs", CommitHash) {
 		<main data-init={ fmt.Sprintf("@get('%s/sse')", ProcessesUrl) }>
@@ -16,21 +39,11 @@ templ ProcessesTable(procs *ProcessInfo) {
 	<section>
 		<h4 class="color-muted">Top { fmt.Sprint(len(procs.Processes)) } By Memory</h4>
 		<div class="progress-box">
-			<neo-progress
-				min="0"
-				max="100"
-				style="max-width: 240px"
-				data-attr:value={ fmt.Sprint(int(100 - (100 * procs.MemInfo.MemFree / procs.MemInfo.MemTotal))) }
-				label="Memory Used"
-				unit="%"
-				easing="500ms cubic-bezier(0.16, 1, 0.3, 1)"
-			>
-				<span data-neo-progress-mark="100">
-					{ fmt.Sprintf("%.2f",procs.MemInfo.MemTotal-procs.MemInfo.MemFree ) }GiB
-					&nbsp;of&nbsp;
-					{ fmt.Sprintf("%.2f", procs.MemInfo.MemTotal) }GiB
-				</span>
-			</neo-progress>
+			@progressBar(
+				"Memory Used",
+				int(100-(100*procs.MemInfo.MemFree/procs.MemInfo.MemTotal)),
+				fmt.Sprintf("%.2f GiB of %.2f GiB", procs.MemInfo.MemTotal-procs.MemInfo.MemFree, procs.MemInfo.MemTotal),
+			)
 		</div>
 		<table>
 			<thead>

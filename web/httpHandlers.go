@@ -101,7 +101,7 @@ func readContainerFiles() []struct{ Name, Content string } {
 	}
 
 	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".container") {
+		if !entry.IsDir() {
 			filePath := dir + "/" + entry.Name()
 			data, err := os.ReadFile(filePath)
 			if err != nil {
@@ -147,6 +147,34 @@ func etcPageSSE() http.HandlerFunc {
 				caddyConfig := readCaddyfile()
 				containers := readContainerFiles()
 				if err := sse.PatchElementTempl(EtcPage(caddyConfig, containers)); err != nil {
+					return
+				}
+			}
+		}
+	}
+}
+
+func sshPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := SshPage().Render(r.Context(), w); err != nil {
+			slog.Debug("render error", "component", "EtcPage", "err", err)
+		}
+	}
+}
+
+func sshPageSSE() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sse := datastar.NewSSE(w, r, datastar.WithCompression(datastar.WithBrotli()))
+
+		ticker := time.NewTicker(time.Duration(UpdateTick) * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-r.Context().Done():
+				return
+			case <-ticker.C:
+				if err := sse.PatchElementTempl(SshPage()); err != nil {
 					return
 				}
 			}

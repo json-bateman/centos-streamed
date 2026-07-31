@@ -60,6 +60,7 @@ templ Layout(title, commitHash string) {
 						<a href={ templ.SafeURL(HomeUrl) }>Home</a>
 						<a href={ templ.SafeURL(ProcessesUrl) }>Processes</a>
 						<a href={ templ.SafeURL(EtcUrl) }>Config</a>
+						<a href={ templ.SafeURL(SshUrl) }>SSH</a>
 					</nav>
 					<div id="sidebar-footer">{ commitHash }</div>
 				</aside>
@@ -100,7 +101,5 @@ templ Layout(title, commitHash string) {
 		<script type="module" src={ StaticPath("js/datastar-inspector.js") }></script>
 		<!-- Datastar v1.0.0-RC.8 -->
 		<script type="module" src={ StaticPath("js/datastar.js") }></script>
-		<!-- Morpheus bundle — classic script (registers the <neo-*> custom elements). -->
-		<script defer src={ StaticPath("js/bundle.js") }></script>
 	</html>
 }

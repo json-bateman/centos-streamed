@@ -31,20 +31,19 @@ templ Layout(title, commitHash string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
 			<link rel="icon" type="image/png" href={ StaticPath("images/centos-favicon.png") }/>
-			<!-- Need this IIFE to  run before CSS loads,
-      prevents theme flash since D* is deferred with type="module" -->
+			<!-- Need this IIFE to  run before CSS loads, prevents theme flash since D* is deferred with type="module" -->
 			<script>
-                (function() {
-                    const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                    document.documentElement.setAttribute('data-theme', theme);
-                })();
-                // True when `key` was pressed bare: no modifiers, not while
-                // typing in a form field. Shared by all data-on:keydown hotkeys.
-                window.hotkey = (evt, key) =>
-                    evt.key === key &&
-                    !evt.ctrlKey && !evt.metaKey && !evt.altKey &&
-                    !evt.target.closest('input, textarea, select, [contenteditable]');
-            </script>
+                    (function() {
+                        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                        document.documentElement.setAttribute('data-theme', theme);
+                    })();
+                     // True when `key` was pressed bare: no modifiers &
+                     // not while typing in a form field. Shared by all data-on:keydown hotkeys.
+                     window.hotkey = (evt, key) =>
+                        evt.key === key &&
+                        !evt.ctrlKey && !evt.metaKey && !evt.altKey &&
+                        !evt.target.closest('input, textarea, select, [contenteditable]');
+               </script>
 			<link href={ StaticPath("css/main.css") } rel="stylesheet"/>
 		</head>
 		<datastar-inspector></datastar-inspector>
@@ -60,8 +59,8 @@ templ Layout(title, commitHash string) {
 						<a href={ templ.SafeURL(HomeUrl) }>/</a>
 						<a href={ templ.SafeURL(ProcessesUrl) }>/proc</a>
 						<a href={ templ.SafeURL(EtcUrl) }>/etc</a>
-						<a href={ templ.SafeURL(SshUrl) }>SSH</a>
 						<a href={ templ.SafeURL(VarWwwUrl) }>/var/www</a>
+						<a href={ templ.SafeURL(SshUrl) }>misc</a>
 					</nav>
 					<div id="sidebar-footer">{ commitHash }</div>
 				</aside>

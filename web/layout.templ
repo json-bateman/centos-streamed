@@ -57,10 +57,11 @@ templ Layout(title, commitHash string) {
 					data-on:click__outside="window.matchMedia('(max-width: 768px)').matches && !evt.target.closest('#sidebar-toggle') && ($sidebarOpen = false)"
 				>
 					<nav id="sidebar-nav">
-						<a href={ templ.SafeURL(HomeUrl) }>Home</a>
-						<a href={ templ.SafeURL(ProcessesUrl) }>Processes</a>
-						<a href={ templ.SafeURL(EtcUrl) }>Config</a>
+						<a href={ templ.SafeURL(HomeUrl) }>/</a>
+						<a href={ templ.SafeURL(ProcessesUrl) }>/proc</a>
+						<a href={ templ.SafeURL(EtcUrl) }>/etc</a>
 						<a href={ templ.SafeURL(SshUrl) }>SSH</a>
+						<a href={ templ.SafeURL(VarWwwUrl) }>/var/www</a>
 					</nav>
 					<div id="sidebar-footer">{ commitHash }</div>
 				</aside>

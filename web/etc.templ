@@ -5,12 +5,26 @@ import "fmt"
 templ EtcPage(caddyConfig string, containers []struct{ Name, Content string }) {
 	@Layout("/etc", CommitHash) {
 		<main data-init={ fmt.Sprintf("@get('%s/sse')", EtcUrl) }>
-			<h3 class="mb-4">Web Files Configuration</h3>
-			@ContainersList(containers)
-			<br/>
+			<h3 class="mb-4">Caddy and Quadlet Config</h3>
 			@CaddyConfig(caddyConfig)
+			<br/>
+			@ContainersList(containers)
 		</main>
 	}
+}
+
+templ CaddyConfig(caddyConfig string) {
+	<section>
+		<h4 class="color-muted">Caddy Configuration (/etc/caddy/Caddyfile)</h4>
+		<details data-ignore-morph class="tree-file">
+			<summary>
+				<div class="caddy-img">
+					<img src={ StaticPath("images/Caddy.svg") }/>
+				</div>
+			</summary>
+			<pre>{ caddyConfig }</pre>
+		</details>
+	</section>
 }
 
 templ ContainersList(containers []struct{ Name, Content string }) {
@@ -21,19 +35,12 @@ templ ContainersList(containers []struct{ Name, Content string }) {
 		} else {
 			<div class="config-list">
 				for _, container := range containers {
-					<details data-ignore-morph class="config-item">
-						<summary>{ container.Name }</summary>
+					<details data-ignore-morph class="tree-file">
+						<summary>📄 { container.Name }</summary>
 						<pre>{ container.Content }</pre>
 					</details>
 				}
 			</div>
 		}
-	</section>
-}
-
-templ CaddyConfig(caddyConfig string) {
-	<section>
-		<h4 class="color-muted">Caddy Configuration (/etc/caddy/)</h4>
-		<pre class="config-code">{ caddyConfig }</pre>
 	</section>
 }
